@@ -7,8 +7,13 @@ edition = "2021"
 
 [dependencies]
 rand = "0.8"
-default-net = "0.21"
-xenet = "0.2"
+default-net = { version = "0.21", optional = true }
+xenet = { version = "0.2", optional = true }
 hickory-resolver = "0.24"
 tokio = "1.21"
 futures = {version = "0.3", features = ["executor", "thread-pool"]}
+serde = { version = "1", features = ["derive"], optional = true }
+
+[features]
+default = ["dep:default-net", "dep:xenet", "serde"]
+serde = ["dep:serde", "default-net/serde", "xenet/serde"]
