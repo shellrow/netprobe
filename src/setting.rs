@@ -3,11 +3,11 @@ use xenet::packet::ip::IpNextLevelProtocol;
 use std::time::Duration;
 use std::net::IpAddr;
 
-//#[cfg(feature = "serde")]
-//use serde::{Deserialize, Serialize};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug)]
-//#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ProbeSetting {
     pub if_index: u32,
     pub if_name: String,
