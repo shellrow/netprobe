@@ -110,7 +110,7 @@ impl ProbeStatus {
 }
 
 #[derive(Clone, Debug)]
-//#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ProbeResult {
     /// Sequence number
     pub seq: u8,
@@ -141,7 +141,7 @@ pub struct ProbeResult {
 }
 
 #[derive(Clone, Debug)]
-//#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PingStat {
     /// Ping responses
     pub responses: Vec<ProbeResult>,
@@ -174,7 +174,7 @@ impl PingStat {
 }
 
 #[derive(Clone, Debug)]
-//#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PingResult {
     pub probe_id: String,
     pub stat: PingStat,
@@ -203,7 +203,7 @@ impl PingResult {
 }
 
 #[derive(Clone, Debug)]
-//#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TracerouteResult {
     pub probe_id: String,
     pub nodes: Vec<ProbeResult>,

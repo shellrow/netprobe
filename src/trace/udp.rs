@@ -1,7 +1,9 @@
 use xenet::datalink::{DataLinkSender, DataLinkReceiver};
 
-use crate::setting::ProbeSetting;
+use crate::{setting::ProbeSetting, result::TracerouteResult};
 
-fn udp_trace(channel: (&mut Box<dyn DataLinkSender>, &mut Box<dyn DataLinkReceiver>), setting: &ProbeSetting, seq: u8) {
+fn udp_trace(channel: (&mut Box<dyn DataLinkSender>, &mut Box<dyn DataLinkReceiver>), setting: &ProbeSetting) -> TracerouteResult {
+    let mut result = TracerouteResult::new();
     
+    result
 }

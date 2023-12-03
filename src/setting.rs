@@ -24,4 +24,5 @@ pub struct ProbeSetting {
     pub receive_timeout: Duration,
     pub probe_timeout: Duration,
     pub send_rate: Duration,
+    pub use_tun: bool,
 }
