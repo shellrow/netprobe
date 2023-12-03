@@ -1,6 +1,6 @@
 use std::time::Duration;
 use std::net::IpAddr;
-use xenet::packet::ip::IpNextLevelProtocol;
+use crate::setting::Protocol;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -131,7 +131,7 @@ pub struct ProbeResult {
     /// Status
     pub probe_status: ProbeStatus,
     /// Protocol
-    pub protocol: IpNextLevelProtocol,
+    pub protocol: Protocol,
     /// Node type
     pub node_type: NodeType,
     /// Sent packet size
@@ -145,30 +145,30 @@ pub struct ProbeResult {
 pub struct PingStat {
     /// Ping responses
     pub responses: Vec<ProbeResult>,
-    /// The entire ping probe time (microsecond)
-    pub probe_time: u64,
+    /// The entire ping probe time
+    pub probe_time: Duration,
     /// Transmitted packets
     pub transmitted_count: usize,
     /// Received packets
     pub received_count: usize,
-    /// Minimum RTT (microsecond)
-    pub min: u64,
-    /// Avarage RTT (microsecond)
-    pub avg: u64,
-    /// Maximum RTT (microsecond)
-    pub max: u64,
+    /// Minimum RTT
+    pub min: Duration,
+    /// Avarage RTT
+    pub avg: Duration,
+    /// Maximum RTT
+    pub max: Duration,
 }
 
 impl PingStat {
     pub fn new() -> PingStat {
         PingStat {
             responses: Vec::new(),
-            probe_time: 0,
+            probe_time: Duration::from_millis(0),
             transmitted_count: 0,
             received_count: 0,
-            min: 0,
-            avg: 0,
-            max: 0,
+            min: Duration::from_millis(0),
+            avg: Duration::from_millis(0),
+            max: Duration::from_millis(0),
         }
     }
 }
@@ -176,28 +176,26 @@ impl PingStat {
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PingResult {
-    pub probe_id: String,
     pub stat: PingStat,
-    pub probe_status: ProbeStatusKind,
+    pub probe_status: ProbeStatus,
     /// start-time in RFC 3339 and ISO 8601 date and time string
     pub start_time: String,
     /// end-time in RFC 3339 and ISO 8601 date and time string
     pub end_time: String,
     /// Elapsed time in milliseconds
-    pub elapsed_time: u64,
-    pub protocol: IpNextLevelProtocol,
+    pub elapsed_time: Duration,
+    pub protocol: Protocol,
 }
 
 impl PingResult {
     pub fn new() -> PingResult {
         PingResult {
-            probe_id: String::new(),
             stat: PingStat::new(),
-            probe_status: ProbeStatusKind::Done,
+            probe_status: ProbeStatus::new(),
             start_time: String::new(),
             end_time: String::new(),
-            elapsed_time: 0,
-            protocol: IpNextLevelProtocol::Icmp,
+            elapsed_time: Duration::from_millis(0),
+            protocol: Protocol::ICMP,
         }
     }
 }
@@ -205,28 +203,26 @@ impl PingResult {
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TracerouteResult {
-    pub probe_id: String,
     pub nodes: Vec<ProbeResult>,
-    pub probe_status: ProbeStatusKind,
+    pub probe_status: ProbeStatus,
     /// start-time in RFC 3339 and ISO 8601 date and time string
     pub start_time: String,
     /// end-time in RFC 3339 and ISO 8601 date and time string
     pub end_time: String,
     /// Elapsed time in milliseconds
     pub elapsed_time: u64,
-    pub protocol: IpNextLevelProtocol,
+    pub protocol: Protocol,
 }
 
 impl TracerouteResult {
     pub fn new() -> TracerouteResult {
         TracerouteResult {
-            probe_id: String::new(),
             nodes: Vec::new(),
-            probe_status: ProbeStatusKind::Done,
+            probe_status: ProbeStatus::new(),
             start_time: String::new(),
             end_time: String::new(),
             elapsed_time: 0,
-            protocol: IpNextLevelProtocol::Udp,
+            protocol: Protocol::UDP,
         }
     }
 }

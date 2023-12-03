@@ -1,5 +1,7 @@
 pub mod setting;
 pub mod result;
+pub mod sys;
+pub mod interface;
 pub mod ip;
 pub mod dns;
 pub mod packet;

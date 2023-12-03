@@ -13,6 +13,7 @@ hickory-resolver = "0.24"
 tokio = "1.21"
 futures = {version = "0.3", features = ["executor", "thread-pool"]}
 serde = { version = "1", features = ["derive"], optional = true }
+chrono = "0.4"
 
 [features]
 default = ["dep:default-net", "dep:xenet", "serde"]

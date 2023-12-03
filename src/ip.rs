@@ -6,3 +6,13 @@ pub fn is_global_addr(ip_addr: IpAddr) -> bool {
         IpAddr::V6(ipv6) => xenet::net::ipnet::is_global_ipv6(&ipv6),
     }
 }
+
+pub(crate) fn guess_initial_ttl(ttl: u8) -> u8 {
+    if ttl <= 64 {
+        64
+    } else if 64 < ttl && ttl <= 128 {
+        128
+    } else {
+        255
+    }
+}
