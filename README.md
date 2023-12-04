@@ -1,2 +1,2 @@
-# netprobe
-Cross-Platform Network Diagnostics Library
+# [WIP] netprobe
+Cross-Platform Network Probe Library
