@@ -9,6 +9,9 @@ use xenet::util::packet_builder::ipv6::Ipv6PacketBuilder;
 use xenet::util::packet_builder::tcp::TcpPacketBuilder;
 use crate::setting::ProbeSetting;
 
+pub(crate) const TCP_DEFAULT_SRC_PORT: u16 = 44322;
+pub(crate) const TCP_DEFAULT_DST_PORT: u16 = 80;
+
 /// Build TCP packet
 pub fn build_tcp_packet(setting: ProbeSetting, hop_limit: Option<u8>) -> Vec<u8> {
     let mut packet_builder = PacketBuilder::new();
@@ -58,8 +61,8 @@ pub fn build_tcp_packet(setting: ProbeSetting, hop_limit: Option<u8>) -> Vec<u8>
         IpAddr::V4(dst_ipv4) => match setting.src_ip {
             IpAddr::V4(src_ipv4) => {
                 let mut tcp_packet_builder = TcpPacketBuilder::new(
-                    SocketAddr::new(IpAddr::V4(src_ipv4), setting.src_port),
-                    SocketAddr::new(IpAddr::V4(dst_ipv4), setting.dst_port),
+                    SocketAddr::new(IpAddr::V4(src_ipv4), setting.src_port.unwrap_or(TCP_DEFAULT_SRC_PORT)),
+                    SocketAddr::new(IpAddr::V4(dst_ipv4), setting.dst_port.unwrap_or(TCP_DEFAULT_DST_PORT)),
                 );
                 tcp_packet_builder.flags = TcpFlags::SYN;
                 tcp_packet_builder.options = vec![
@@ -77,8 +80,8 @@ pub fn build_tcp_packet(setting: ProbeSetting, hop_limit: Option<u8>) -> Vec<u8>
             IpAddr::V4(_) => {}
             IpAddr::V6(src_ipv6) => {
                 let mut tcp_packet_builder = TcpPacketBuilder::new(
-                    SocketAddr::new(IpAddr::V6(src_ipv6), setting.src_port),
-                    SocketAddr::new(IpAddr::V6(dst_ipv6), setting.dst_port),
+                    SocketAddr::new(IpAddr::V6(src_ipv6), setting.src_port.unwrap_or(TCP_DEFAULT_SRC_PORT)),
+                    SocketAddr::new(IpAddr::V6(dst_ipv6), setting.dst_port.unwrap_or(TCP_DEFAULT_DST_PORT)),
                 );
                 tcp_packet_builder.flags = TcpFlags::SYN;
                 tcp_packet_builder.options = vec![

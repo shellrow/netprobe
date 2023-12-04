@@ -48,12 +48,12 @@ pub async fn lookup_host_name_async(host_name: String) -> Option<IpAddr> {
     }
 }
 
-pub fn lookup_ip_addr(ip_addr: String) -> String {
+pub fn lookup_ip_addr(ip_addr: IpAddr) -> Option<String> {
     let ips: Vec<String> = resolve_ip(ip_addr);
     if ips.len() > 0 {
-        return ips[0].clone();
+        return Some(ips[0].clone());
     } else {
-        return String::new();
+        return None;
     }
 }
 
@@ -97,8 +97,7 @@ fn resolve_domain(host_name: String) -> Vec<IpAddr> {
 }
 
 #[cfg(any(unix, target_os = "windows"))]
-fn resolve_ip(ip_addr: String) -> Vec<String> {
-    let ip_addr: IpAddr = IpAddr::from_str(ip_addr.as_str()).unwrap();
+fn resolve_ip(ip_addr: IpAddr) -> Vec<String> {
     let mut names: Vec<String> = vec![];
     let mut system_conf = hickory_resolver::system_conf::read_system_conf().unwrap();
     if crate::ip::is_global_addr(ip_addr) {
@@ -131,10 +130,10 @@ fn resolve_ip(ip_addr: String) -> Vec<String> {
 }
 
 #[cfg(not(any(unix, target_os = "windows")))]
-fn resolve_ip(ip_addr: String) -> Vec<String> {
+fn resolve_ip(ip_addr: IpAddr) -> Vec<String> {
     let mut names: Vec<String> = vec![];
     let resolver = Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap();
-    match resolver.reverse_lookup(IpAddr::from_str(ip_addr.as_str()).unwrap()) {
+    match resolver.reverse_lookup(ip_addr) {
         Ok(rlookup) => {
             for record in rlookup.as_lookup().record_iter() {
                 match record.data() {

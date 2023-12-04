@@ -8,6 +8,9 @@ use xenet::util::packet_builder::ipv6::Ipv6PacketBuilder;
 use xenet::util::packet_builder::udp::UdpPacketBuilder;
 use crate::setting::ProbeSetting;
 
+pub(crate) const UDP_DEFAULT_SRC_PORT: u16 = 53445;
+pub(crate) const UDP_BASE_DST_PORT: u16 = 33435;
+
 /// Build UDP packet
 pub fn build_udp_packet(setting: ProbeSetting, hop_limit: Option<u8>) -> Vec<u8> {
     let mut packet_builder = PacketBuilder::new();
@@ -57,8 +60,8 @@ pub fn build_udp_packet(setting: ProbeSetting, hop_limit: Option<u8>) -> Vec<u8>
         IpAddr::V4(dst_ipv4) => match setting.src_ip {
             IpAddr::V4(src_ipv4) => {
                 let udp_packet_builder = UdpPacketBuilder::new(
-                    SocketAddr::new(IpAddr::V4(src_ipv4), setting.src_port),
-                    SocketAddr::new(IpAddr::V4(dst_ipv4), setting.dst_port),
+                    SocketAddr::new(IpAddr::V4(src_ipv4), setting.src_port.unwrap_or(UDP_DEFAULT_SRC_PORT)),
+                    SocketAddr::new(IpAddr::V4(dst_ipv4), setting.dst_port.unwrap_or(UDP_BASE_DST_PORT)),
                 );
                 packet_builder.set_udp(udp_packet_builder);
             }
@@ -68,8 +71,8 @@ pub fn build_udp_packet(setting: ProbeSetting, hop_limit: Option<u8>) -> Vec<u8>
             IpAddr::V4(_) => {}
             IpAddr::V6(src_ipv6) => {
                 let udp_packet_builder = UdpPacketBuilder::new(
-                    SocketAddr::new(IpAddr::V6(src_ipv6), setting.src_port),
-                    SocketAddr::new(IpAddr::V6(dst_ipv6), setting.dst_port),
+                    SocketAddr::new(IpAddr::V6(src_ipv6), setting.src_port.unwrap_or(UDP_DEFAULT_SRC_PORT)),
+                    SocketAddr::new(IpAddr::V6(dst_ipv6), setting.dst_port.unwrap_or(UDP_BASE_DST_PORT)),
                 );
                 packet_builder.set_udp(udp_packet_builder);
             }

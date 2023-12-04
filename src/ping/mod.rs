@@ -24,6 +24,12 @@ pub struct Pinger {
 impl Pinger {
     /// Create new Pinger instance with destination IP address
     pub fn new(setting: ProbeSetting) -> Result<Pinger, String> {
+        // Check interface
+        if crate::interface::get_interface_by_index(setting.if_index).is_none() {
+            if crate::interface::get_interface_by_name(setting.if_name.clone()).is_none() {
+                return Err(format!("Pinger::new: unable to get interface. index: {}, name: {}", setting.if_index, setting.if_name));
+            }
+        }
         let (tx, rx) = channel();
         let pinger = Pinger {
             probe_setting: setting,

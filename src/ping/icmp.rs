@@ -61,6 +61,7 @@ pub(crate) fn icmp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataL
                                     },
                                     Err(_) => {}
                                 }
+                                break;
                             }
                         }
                         // IPv6 ICMP (ICMPv6)
@@ -90,6 +91,7 @@ pub(crate) fn icmp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataL
                                     },
                                     Err(_) => {}
                                 }
+                                break;
                             }
                         }
                     }
@@ -102,6 +104,7 @@ pub(crate) fn icmp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataL
                 return result;
             }
         }
+        std::thread::sleep(setting.send_rate);
     }
     result.end_time = crate::sys::get_sysdate();
     result.elapsed_time = Instant::now().duration_since(start_time);
