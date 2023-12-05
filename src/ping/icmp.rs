@@ -19,7 +19,6 @@ pub(crate) fn icmp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataL
     }
     result.start_time = crate::sys::get_sysdate();
     let start_time = Instant::now();
-    let mut probe_time = Duration::from_millis(0);
     let mut responses: Vec<ProbeResult> = Vec::new();
     for seq in 1..setting.count + 1 {
         let icmp_packet: Vec<u8> = crate::packet::icmp::build_icmp_packet(setting.clone(), None);
@@ -96,18 +95,39 @@ pub(crate) fn icmp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataL
                         }
                     }
                 },
-                Err(e) => eprintln!("Failed to receive packet: {}", e),
+                Err(e) => {
+                    eprintln!("Failed to receive packet: {}", e);
+                    let probe_result = ProbeResult::timeout(seq, setting.dst_ip, setting.dst_hostname.clone(), Protocol::ICMP, icmp_packet.len());
+                    responses.push(probe_result.clone());
+                    match msg_tx.lock() {
+                        Ok(lr) => match lr.send(probe_result) {
+                            Ok(_) => {}
+                            Err(_) => {}
+                        },
+                        Err(_) => {}
+                    }
+                },
             }
-            probe_time = Instant::now().duration_since(start_time);
-            if probe_time > setting.probe_timeout {
-                result.probe_status = ProbeStatus::with_timeout_message(format!("Request timeout for icmp_seq {}", seq));
-                return result;
+            let wait_time: Duration = Instant::now().duration_since(send_time);
+            if wait_time > setting.receive_timeout {
+                let probe_result = ProbeResult::timeout(seq, setting.dst_ip, setting.dst_hostname.clone(), Protocol::ICMP, icmp_packet.len());
+                responses.push(probe_result.clone());
+                match msg_tx.lock() {
+                    Ok(lr) => match lr.send(probe_result) {
+                        Ok(_) => {}
+                        Err(_) => {}
+                    },
+                    Err(_) => {}
+                }
             }
         }
-        std::thread::sleep(setting.send_rate);
+        if seq < setting.count {
+            std::thread::sleep(setting.send_rate);
+        }
     }
+    let probe_time = Instant::now().duration_since(start_time);
     result.end_time = crate::sys::get_sysdate();
-    result.elapsed_time = Instant::now().duration_since(start_time);
+    result.elapsed_time = probe_time;
     let ping_stat: PingStat = PingStat {
         responses: responses.clone(),
         probe_time: probe_time,
