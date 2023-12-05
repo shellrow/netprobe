@@ -140,6 +140,43 @@ pub struct ProbeResult {
     pub received_packet_size: usize,   
 }
 
+impl ProbeResult {
+    pub fn new() -> ProbeResult {
+        ProbeResult {
+            seq: 0,
+            ip_addr: IpAddr::V4(std::net::Ipv4Addr::LOCALHOST),
+            host_name: String::new(),
+            port_number: None,
+            port_status: None,
+            ttl: 0,
+            hop: 0,
+            rtt: Duration::from_millis(0),
+            probe_status: ProbeStatus::new(),
+            protocol: Protocol::ICMP,
+            node_type: NodeType::Destination,
+            sent_packet_size: 0,
+            received_packet_size: 0,
+        }
+    }
+    pub fn timeout(seq: u8, ip_addr: IpAddr, host_name: String, protocol: Protocol, sent_packet_size: usize) -> ProbeResult {
+        ProbeResult {
+            seq: seq,
+            ip_addr: ip_addr,
+            host_name: host_name,
+            port_number: None,
+            port_status: None,
+            ttl: 0,
+            hop: 0,
+            rtt: Duration::from_millis(0),
+            probe_status: ProbeStatus::with_timeout_message(format!("Request timeout for icmp_seq {}", seq)),
+            protocol: protocol,
+            node_type: NodeType::Destination,
+            sent_packet_size: sent_packet_size,
+            received_packet_size: 0,
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PingStat {
