@@ -31,7 +31,7 @@ pub fn build_udp_packet(setting: ProbeSetting, hop_limit: Option<u8>) -> Vec<u8>
         IpAddr::V4(dst_ipv4) => match setting.src_ip {
             IpAddr::V4(src_ipv4) => {
                 let mut ipv4_packet_builder =
-                    Ipv4PacketBuilder::new(src_ipv4, dst_ipv4, IpNextLevelProtocol::Icmp);
+                    Ipv4PacketBuilder::new(src_ipv4, dst_ipv4, IpNextLevelProtocol::Udp);
                 if let Some(hoplimit) = hop_limit {
                     ipv4_packet_builder.ttl = Some(hoplimit);
                 }else {
@@ -45,7 +45,7 @@ pub fn build_udp_packet(setting: ProbeSetting, hop_limit: Option<u8>) -> Vec<u8>
             IpAddr::V4(_) => {}
             IpAddr::V6(src_ipv4) => {
                 let mut ipv6_packet_builder =
-                    Ipv6PacketBuilder::new(src_ipv4, dst_ipv6, IpNextLevelProtocol::Icmpv6);
+                    Ipv6PacketBuilder::new(src_ipv4, dst_ipv6, IpNextLevelProtocol::Udp);
                 if let Some(hoplimit) = hop_limit {
                     ipv6_packet_builder.hop_limit = Some(hoplimit);
                 }else {
