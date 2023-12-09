@@ -7,16 +7,16 @@ edition = "2021"
 
 [dependencies]
 rand = "0.8"
+chrono = "0.4"
 default-net = { version = "0.21", optional = true }
 xenet = { version = "0.3", optional = true }
 hickory-resolver = { version = "0.24" }
 tokio = { version = "1.21", optional = true }
 futures = {version = "0.3", features = ["executor", "thread-pool"], optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
-chrono = "0.4"
 
 [features]
-default = ["dep:default-net", "dep:xenet", "async"]
+default = ["dep:default-net", "dep:xenet"]
 serde = ["dep:serde", "default-net/serde", "xenet/serde"]
 async = ["dep:tokio", "dep:futures"]
 
