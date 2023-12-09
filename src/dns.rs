@@ -1,13 +1,18 @@
-use futures::stream::{self, StreamExt};
-use std::collections::HashMap;
 use std::net::IpAddr;
-use std::str::FromStr;
-use std::thread;
 use std::time::Duration;
+
 #[cfg(not(any(unix, target_os = "windows")))]
 use hickory_resolver::config::{ResolverConfig, ResolverOpts};
 use hickory_resolver::Resolver;
 
+#[cfg(feature = "async")]
+use std::collections::HashMap;
+#[cfg(feature = "async")]
+use std::str::FromStr;
+#[cfg(feature = "async")]
+use std::thread;
+#[cfg(feature = "async")]
+use futures::stream::{self, StreamExt};
 #[cfg(feature = "async")]
 use hickory_resolver::AsyncResolver;
 
@@ -281,6 +286,7 @@ pub async fn lookup_ips_async(ips: Vec<IpAddr>) -> HashMap<IpAddr, String> {
     results
 }
 
+#[cfg(feature = "async")]
 pub fn lookup_ips(ips: Vec<IpAddr>) -> HashMap<IpAddr, String> {
     let rt: tokio::runtime::Runtime = tokio::runtime::Runtime::new().unwrap();
     let handle = thread::spawn(move || rt.block_on(async { lookup_ips_async(ips).await }));
