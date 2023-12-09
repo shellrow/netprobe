@@ -2,8 +2,13 @@
 name = "netprobe"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["shellrow <shellrow@protonmail.com>"]
+description = "Cross-Platform Network Probe Library"
+repository = "https://github.com/shellrow/netprobe"
+readme = "README.md"
+keywords = ["network"]
+categories = ["network-programming"]
+license = "MIT"
 
 [dependencies]
 rand = "0.8"
