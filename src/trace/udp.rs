@@ -4,6 +4,7 @@ use xenet::packet::icmp::IcmpType;
 use xenet::packet::icmpv6::Icmpv6Type;
 use crate::setting::{ProbeSetting, Protocol};
 use crate::result::{ProbeResult, TracerouteResult, ProbeStatus, NodeType};
+use crate::result::PortStatus;
 use std::net::IpAddr;
 use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
@@ -75,8 +76,8 @@ pub fn udp_trace(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLinkRece
                                             seq: seq_ttl,
                                             ip_addr: IpAddr::V4(ipv4_header.source),
                                             host_name: ipv4_header.source.to_string(),
-                                            port_number: None,
-                                            port_status: None,
+                                            port_number: setting.dst_port,
+                                            port_status: Some(PortStatus::Closed),
                                             ttl: ipv4_header.ttl,
                                             hop: crate::ip::guess_initial_ttl(ipv4_header.ttl) - ipv4_header.ttl,
                                             rtt: recv_time,
@@ -141,8 +142,8 @@ pub fn udp_trace(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLinkRece
                                             seq: seq_ttl,
                                             ip_addr: IpAddr::V6(ipv6_header.source),
                                             host_name: ipv6_header.source.to_string(),
-                                            port_number: None,
-                                            port_status: None,
+                                            port_number: setting.dst_port,
+                                            port_status: Some(PortStatus::Closed),
                                             ttl: ipv6_header.hop_limit,
                                             hop: crate::ip::guess_initial_ttl(ipv6_header.hop_limit) - ipv6_header.hop_limit,
                                             rtt: recv_time,

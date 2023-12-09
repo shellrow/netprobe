@@ -4,6 +4,7 @@ use xenet::packet::icmp::IcmpType;
 use xenet::packet::icmpv6::Icmpv6Type;
 use crate::setting::{ProbeSetting, Protocol};
 use crate::result::{ProbeResult, PingResult, ProbeStatus, NodeType, PingStat};
+use crate::result::PortStatus;
 use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
 use std::time::{Instant, Duration};
@@ -41,8 +42,8 @@ pub(crate) fn udp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLi
                                     seq: seq,
                                     ip_addr: setting.dst_ip,
                                     host_name: setting.dst_hostname.clone(),
-                                    port_number: None,
-                                    port_status: None,
+                                    port_number: setting.dst_port,
+                                    port_status: Some(PortStatus::Closed),
                                     ttl: ttl,
                                     hop: crate::ip::guess_initial_ttl(ttl) - ttl,
                                     rtt: recv_time,
@@ -71,8 +72,8 @@ pub(crate) fn udp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLi
                                     seq: seq,
                                     ip_addr: setting.dst_ip,
                                     host_name: setting.dst_hostname.clone(),
-                                    port_number: None,
-                                    port_status: None,
+                                    port_number: setting.dst_port,
+                                    port_status: Some(PortStatus::Closed),
                                     ttl: ttl,
                                     hop: crate::ip::guess_initial_ttl(ttl) - ttl,
                                     rtt: recv_time,
