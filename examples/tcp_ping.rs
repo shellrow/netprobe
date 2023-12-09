@@ -13,7 +13,7 @@ fn main() {
         pinger.ping()
     });
     for r in rx.lock().unwrap().iter() {
-        println!("{} [{:?}] {} Bytes from IP:{}, HOP:{}, TTL:{}, RTT:{:?}", r.seq, r.protocol, r.received_packet_size, r.ip_addr,  r.hop, r.ttl, r.rtt);
+        println!("{} [{:?}] {} Bytes from IP:{}, Port:{:?}, Status:{:?}, HOP:{}, TTL:{}, RTT:{:?}", r.seq, r.protocol, r.received_packet_size, r.ip_addr, r.port_number, r.port_status, r.hop, r.ttl, r.rtt);
     }
     match handle.join() {
         Ok(ping_result) => {
