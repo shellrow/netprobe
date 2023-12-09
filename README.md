@@ -1,2 +1,2 @@
-# [WIP] netprobe
+# netprobe
 Cross-Platform Network Probe Library
