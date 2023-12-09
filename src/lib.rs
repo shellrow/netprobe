@@ -1,9 +1,9 @@
 pub mod setting;
 pub mod result;
-pub mod sys;
-pub mod interface;
-pub mod ip;
+mod sys;
+mod interface;
+mod ip;
 pub mod dns;
-pub mod packet;
+mod packet;
 pub mod ping;
 pub mod trace;

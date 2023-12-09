@@ -1,4 +1,4 @@
-use xenet::net::mac::MacAddr;
+pub use xenet::net::mac::MacAddr;
 use std::time::Duration;
 use std::net::IpAddr;
 use std::net::Ipv4Addr;

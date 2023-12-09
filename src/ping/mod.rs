@@ -1,6 +1,6 @@
-pub mod icmp;
-pub mod tcp;
-pub mod udp;
+pub(crate) mod icmp;
+pub(crate) mod tcp;
+pub(crate) mod udp;
 
 use crate::setting::ProbeSetting;
 use crate::result::{ProbeResult, PingResult};
@@ -16,9 +16,9 @@ pub struct Pinger {
     /// Probe Setting
     pub probe_setting: ProbeSetting,
     /// Sender for progress messaging
-    pub tx: Arc<Mutex<Sender<ProbeResult>>>,
+    tx: Arc<Mutex<Sender<ProbeResult>>>,
     /// Receiver for progress messaging
-    pub rx: Arc<Mutex<Receiver<ProbeResult>>>,
+    rx: Arc<Mutex<Receiver<ProbeResult>>>,
 }
 
 impl Pinger {

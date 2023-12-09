@@ -10,7 +10,7 @@ use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
 use std::time::{Instant, Duration};
 
-pub fn udp_trace(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLinkReceiver>, setting: &ProbeSetting, msg_tx: &Arc<Mutex<Sender<ProbeResult>>>) -> TracerouteResult {
+pub(crate) fn udp_trace(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLinkReceiver>, setting: &ProbeSetting, msg_tx: &Arc<Mutex<Sender<ProbeResult>>>) -> TracerouteResult {
     let mut result = TracerouteResult::new();
     result.protocol = Protocol::UDP;
     let mut parse_option: ParseOption = ParseOption::default();
