@@ -1,4 +1,5 @@
 use std::net::{IpAddr, Ipv4Addr};
+//use std::net::Ipv6Addr;
 use std::{thread, env, process};
 use netprobe::trace::Tracer;
 use netprobe::setting::ProbeSetting;
@@ -29,6 +30,7 @@ fn main() {
         }
     };
     let dst_ip: IpAddr = IpAddr::V4(Ipv4Addr::new(1, 1, 1, 1));
+    //let dst_ip: IpAddr = IpAddr::V6(Ipv6Addr::new(0x2606, 0x4700, 0x4700, 0, 0, 0, 0, 0x1111));
     let setting : ProbeSetting = ProbeSetting::udp_trace(interface, dst_ip, 4).unwrap();
     let tracer: Tracer = Tracer::new(setting).unwrap();
     let rx = tracer.get_progress_receiver();

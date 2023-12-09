@@ -1,10 +1,11 @@
 use std::net::{IpAddr, Ipv4Addr};
+//use std::net::Ipv6Addr;
 use std::{thread, env, process};
 use netprobe::ping::Pinger;
 use netprobe::setting::ProbeSetting;
 use xenet::net::interface::Interface;
 
-// ICMPv4 ping to cloudflare's one.one.one.one (1.1.1.1)
+// ICMP ping to cloudflare's one.one.one.one (1.1.1.1)
 fn main() {
     let interface: Interface = match env::args().nth(2) {
         Some(n) => {
@@ -28,6 +29,7 @@ fn main() {
         }
     };
     let dst_ip: IpAddr = IpAddr::V4(Ipv4Addr::new(1, 1, 1, 1));
+    //let dst_ip: IpAddr = IpAddr::V6(Ipv6Addr::new(0x2606, 0x4700, 0x4700, 0, 0, 0, 0, 0x1111));
     let setting : ProbeSetting = ProbeSetting::icmp_ping(interface, dst_ip, 4).unwrap();
     let pinger: Pinger = Pinger::new(setting).unwrap();
     let rx = pinger.get_progress_receiver();

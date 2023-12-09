@@ -1,4 +1,5 @@
 use std::net::{IpAddr, Ipv4Addr};
+//use std::net::Ipv6Addr;
 use std::{thread, env, process};
 use netprobe::ping::Pinger;
 use netprobe::setting::ProbeSetting;
@@ -28,6 +29,7 @@ fn main() {
         }
     };
     let dst_ip: IpAddr = IpAddr::V4(Ipv4Addr::new(1, 1, 1, 1));
+    //let dst_ip: IpAddr = IpAddr::V6(Ipv6Addr::new(0x2606, 0x4700, 0x4700, 0, 0, 0, 0, 0x1111));
     let setting : ProbeSetting = ProbeSetting::tcp_ping(interface, dst_ip, 80, 4).unwrap();
     let pinger: Pinger = Pinger::new(setting).unwrap();
     let rx = pinger.get_progress_receiver();
