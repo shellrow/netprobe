@@ -1,12 +1,34 @@
 use std::net::{IpAddr, Ipv4Addr};
-use std::thread;
+use std::{thread, env, process};
 use netprobe::ping::Pinger;
 use netprobe::setting::ProbeSetting;
+use xenet::net::interface::Interface;
 
+// UDP ping to cloudflare's one.one.one.one (1.1.1.1)
 fn main() {
-    // ICMPv4 ping to cloudflare's one.one.one.one (1.1.1.1)
+    let interface: Interface = match env::args().nth(2) {
+        Some(n) => {
+            // Use interface specified by user
+            let interfaces: Vec<Interface> = xenet::net::interface::get_interfaces();
+            let interface: Interface = interfaces
+                .into_iter()
+                .find(|interface| interface.name == n)
+                .expect("Failed to get interface information");
+            interface
+        }
+        None => {
+            // Use default interface
+            match Interface::default() {
+                Ok(interface) => interface,
+                Err(e) => {
+                    println!("Failed to get default interface: {}", e);
+                    process::exit(1);
+                }
+            }
+        }
+    };
     let dst_ip: IpAddr = IpAddr::V4(Ipv4Addr::new(1, 1, 1, 1));
-    let setting : ProbeSetting = ProbeSetting::udp_ping_default(dst_ip, 4).unwrap();
+    let setting : ProbeSetting = ProbeSetting::udp_ping(interface, dst_ip, 4).unwrap();
     let pinger: Pinger = Pinger::new(setting).unwrap();
     let rx = pinger.get_progress_receiver();
     let handle = thread::spawn(move || {
