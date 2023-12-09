@@ -168,9 +168,26 @@ impl ProbeResult {
             ttl: 0,
             hop: 0,
             rtt: Duration::from_millis(0),
-            probe_status: ProbeStatus::with_timeout_message(format!("Request timeout for icmp_seq {}", seq)),
+            probe_status: ProbeStatus::with_timeout_message(format!("Request timeout for seq {}", seq)),
             protocol: protocol,
             node_type: NodeType::Destination,
+            sent_packet_size: sent_packet_size,
+            received_packet_size: 0,
+        }
+    }
+    pub fn trace_timeout(seq: u8, protocol: Protocol, sent_packet_size: usize, node_type: NodeType) -> ProbeResult {
+        ProbeResult {
+            seq: seq,
+            ip_addr: IpAddr::V4(std::net::Ipv4Addr::UNSPECIFIED),
+            host_name: String::new(),
+            port_number: None,
+            port_status: None,
+            ttl: 0,
+            hop: 0,
+            rtt: Duration::from_millis(0),
+            probe_status: ProbeStatus::with_timeout_message(format!("Request timeout for seq {}", seq)),
+            protocol: protocol,
+            node_type: node_type,
             sent_packet_size: sent_packet_size,
             received_packet_size: 0,
         }
@@ -219,7 +236,7 @@ pub struct PingResult {
     pub start_time: String,
     /// end-time in RFC 3339 and ISO 8601 date and time string
     pub end_time: String,
-    /// Elapsed time in milliseconds
+    /// Elapsed time
     pub elapsed_time: Duration,
     pub protocol: Protocol,
 }
@@ -246,8 +263,8 @@ pub struct TracerouteResult {
     pub start_time: String,
     /// end-time in RFC 3339 and ISO 8601 date and time string
     pub end_time: String,
-    /// Elapsed time in milliseconds
-    pub elapsed_time: u64,
+    /// Elapsed time
+    pub elapsed_time: Duration,
     pub protocol: Protocol,
 }
 
@@ -258,7 +275,7 @@ impl TracerouteResult {
             probe_status: ProbeStatus::new(),
             start_time: String::new(),
             end_time: String::new(),
-            elapsed_time: 0,
+            elapsed_time: Duration::from_millis(0),
             protocol: Protocol::UDP,
         }
     }

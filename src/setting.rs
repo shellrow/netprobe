@@ -296,4 +296,63 @@ impl ProbeSetting {
         };
         Ok(setting)
     }
+    pub fn udp_trace_default(dst_ip_addr: IpAddr, count: u8) -> Result<ProbeSetting, String> {
+        let default_interface = xenet::net::interface::get_default_interface()?;
+        let src_ip: IpAddr = match dst_ip_addr {
+            IpAddr::V4(_) => {
+                match crate::interface::get_interface_ipv4(&default_interface) {
+                    Some(ip) => ip,
+                    None => {
+                        return Err(String::from(
+                            "IPv4 address not found on default interface.",
+                        ))
+                    }
+                }
+            }
+            IpAddr::V6(ipv6_addr) => {
+                if xenet::net::ipnet::is_global_ipv6(&ipv6_addr) {
+                    match crate::interface::get_interface_global_ipv6(&default_interface) {
+                        Some(ip) => ip,
+                        None => {
+                            return Err(String::from(
+                                "Global IPv6 address not found on default interface.",
+                            ))
+                        }
+                    }
+                } else {
+                    match crate::interface::get_interface_local_ipv6(&default_interface) {
+                        Some(ip) => ip,
+                        None => {
+                            return Err(String::from(
+                                "Local IPv6 address not found on default interface.",
+                            ))
+                        }
+                    }
+                }
+            }
+        };
+        let use_tun = default_interface.is_tun();
+        let loopback = default_interface.is_loopback();
+        
+        let setting = ProbeSetting {
+            if_index: default_interface.index,
+            if_name: default_interface.name.clone(),
+            src_mac: if use_tun { MacAddr::zero() } else { crate::interface::get_interface_macaddr(&default_interface) },
+            dst_mac: if use_tun { MacAddr::zero() } else { crate::interface::get_gateway_macaddr(&default_interface) },
+            src_ip: src_ip,
+            src_port: Some(crate::packet::udp::UDP_DEFAULT_SRC_PORT),
+            dst_ip: dst_ip_addr,
+            dst_hostname: dst_ip_addr.to_string(),
+            dst_port: Some(crate::packet::udp::UDP_BASE_DST_PORT),
+            hop_limit: 64,
+            count: count,
+            protocol: Protocol::UDP,
+            receive_timeout: Duration::from_secs(1),
+            probe_timeout: Duration::from_secs(30),
+            send_rate: Duration::from_secs(1),
+            use_tun: use_tun,
+            loopback: loopback,
+        };
+        Ok(setting)
+    }
 }
