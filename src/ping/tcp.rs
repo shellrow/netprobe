@@ -3,6 +3,7 @@ use xenet::packet::frame::{ParseOption, Frame};
 use xenet::packet::tcp::TcpFlags;
 use crate::setting::{ProbeSetting, Protocol};
 use crate::result::{ProbeResult, PingResult, ProbeStatus, NodeType, PingStat, PortStatus};
+use std::net::IpAddr;
 use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
 use std::time::{Instant, Duration};
@@ -35,6 +36,11 @@ pub(crate) fn tcp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLi
                     if let Some(ip_layer) = &frame.ip {
                         if let Some(transport_layer) = &frame.transport {
                             if let Some(tcp_header) = &transport_layer.tcp {
+                                if let Some(port) = setting.dst_port {
+                                    if tcp_header.source != port {
+                                        continue;
+                                    }
+                                }
                                 let mut probe_result: ProbeResult = ProbeResult {
                                     seq: seq,
                                     ip_addr: setting.dst_ip,
@@ -53,9 +59,15 @@ pub(crate) fn tcp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLi
                                 if tcp_header.flags == TcpFlags::SYN | TcpFlags::ACK {
                                     probe_result.port_status = Some(PortStatus::Open);
                                     if let Some(ipv4) = &ip_layer.ipv4 {
+                                        if IpAddr::V4(ipv4.source) != setting.dst_ip {
+                                            continue;
+                                        }
                                         probe_result.ttl = ipv4.ttl;
                                         probe_result.hop = crate::ip::guess_initial_ttl(ipv4.ttl) - ipv4.ttl;
                                     } else if let Some(ipv6) = &ip_layer.ipv6 {
+                                        if IpAddr::V6(ipv6.source) != setting.dst_ip {
+                                            continue;
+                                        }
                                         probe_result.ttl = ipv6.hop_limit;
                                         probe_result.hop = crate::ip::guess_initial_ttl(ipv6.hop_limit) - ipv6.hop_limit;
                                     }
@@ -71,9 +83,15 @@ pub(crate) fn tcp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLi
                                 } else if tcp_header.flags == TcpFlags::RST | TcpFlags::ACK {
                                     probe_result.port_status = Some(PortStatus::Closed);
                                     if let Some(ipv4) = &ip_layer.ipv4 {
+                                        if IpAddr::V4(ipv4.source) != setting.dst_ip {
+                                            continue;
+                                        }
                                         probe_result.ttl = ipv4.ttl;
                                         probe_result.hop = crate::ip::guess_initial_ttl(ipv4.ttl) - ipv4.ttl;
                                     } else if let Some(ipv6) = &ip_layer.ipv6 {
+                                        if IpAddr::V6(ipv6.source) != setting.dst_ip {
+                                            continue;
+                                        }
                                         probe_result.ttl = ipv6.hop_limit;
                                         probe_result.hop = crate::ip::guess_initial_ttl(ipv6.hop_limit) - ipv6.hop_limit;
                                     }

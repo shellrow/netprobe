@@ -4,6 +4,7 @@ use xenet::packet::icmp::IcmpType;
 use xenet::packet::icmpv6::Icmpv6Type;
 use crate::setting::{ProbeSetting, Protocol};
 use crate::result::{ProbeResult, PingResult, ProbeStatus, NodeType, PingStat};
+use std::net::IpAddr;
 use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
 use std::time::{Instant, Duration};
@@ -33,64 +34,74 @@ pub(crate) fn icmp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataL
                     let recv_time: Duration = Instant::now().duration_since(send_time);
                     let frame: Frame = Frame::from_bytes(&packet, parse_option.clone());
                     if let Some(ip_layer) = &frame.ip {
-                        // IPv4 ICMP
-                        if let Some(icmp_header) = &ip_layer.icmp {
-                            if icmp_header.icmp_type == IcmpType::EchoReply {
-                                let ttl = ip_layer.ipv4.as_ref().unwrap().ttl;
-                                let probe_result: ProbeResult = ProbeResult {
-                                    seq: seq,
-                                    ip_addr: setting.dst_ip,
-                                    host_name: setting.dst_hostname.clone(),
-                                    port_number: None,
-                                    port_status: None,
-                                    ttl: ttl,
-                                    hop: crate::ip::guess_initial_ttl(ttl) - ttl,
-                                    rtt: recv_time,
-                                    probe_status: ProbeStatus::new(),
-                                    protocol: Protocol::ICMP,
-                                    node_type: NodeType::Destination,
-                                    sent_packet_size: icmp_packet.len(),
-                                    received_packet_size: packet.len(),
-                                };
-                                responses.push(probe_result.clone());
-                                match msg_tx.lock() {
-                                    Ok(lr) => match lr.send(probe_result) {
-                                        Ok(_) => {}
+                        // IPv4
+                        if let Some(ipv4_header) = &ip_layer.ipv4 {
+                            if IpAddr::V4(ipv4_header.source) != setting.dst_ip {
+                                continue;
+                            }
+                            // IPv4 ICMP
+                            if let Some(icmp_header) = &ip_layer.icmp {
+                                if icmp_header.icmp_type == IcmpType::EchoReply {
+                                    let probe_result: ProbeResult = ProbeResult {
+                                        seq: seq,
+                                        ip_addr: setting.dst_ip,
+                                        host_name: setting.dst_hostname.clone(),
+                                        port_number: None,
+                                        port_status: None,
+                                        ttl: ipv4_header.ttl,
+                                        hop: crate::ip::guess_initial_ttl(ipv4_header.ttl) - ipv4_header.ttl,
+                                        rtt: recv_time,
+                                        probe_status: ProbeStatus::new(),
+                                        protocol: Protocol::ICMP,
+                                        node_type: NodeType::Destination,
+                                        sent_packet_size: icmp_packet.len(),
+                                        received_packet_size: packet.len(),
+                                    };
+                                    responses.push(probe_result.clone());
+                                    match msg_tx.lock() {
+                                        Ok(lr) => match lr.send(probe_result) {
+                                            Ok(_) => {}
+                                            Err(_) => {}
+                                        },
                                         Err(_) => {}
-                                    },
-                                    Err(_) => {}
+                                    }
+                                    break;
                                 }
-                                break;
                             }
                         }
-                        // IPv6 ICMP (ICMPv6)
-                        if let Some(icmpv6_header) = &ip_layer.icmpv6 {
-                            if icmpv6_header.icmpv6_type == Icmpv6Type::EchoReply {
-                                let ttl = ip_layer.ipv6.as_ref().unwrap().hop_limit;
-                                let probe_result: ProbeResult = ProbeResult {
-                                    seq: seq,
-                                    ip_addr: setting.dst_ip,
-                                    host_name: setting.dst_hostname.clone(),
-                                    port_number: None,
-                                    port_status: None,
-                                    ttl: ttl,
-                                    hop: crate::ip::guess_initial_ttl(ttl) - ttl,
-                                    rtt: recv_time,
-                                    probe_status: ProbeStatus::new(),
-                                    protocol: Protocol::ICMP,
-                                    node_type: NodeType::Destination,
-                                    sent_packet_size: icmp_packet.len(),
-                                    received_packet_size: packet.len(),
-                                };
-                                responses.push(probe_result.clone());
-                                match msg_tx.lock() {
-                                    Ok(lr) => match lr.send(probe_result) {
-                                        Ok(_) => {}
+                        // IPv6
+                        if let Some(ipv6_header) = &ip_layer.ipv6 {
+                            if IpAddr::V6(ipv6_header.source) != setting.dst_ip {
+                                continue;
+                            }
+                            // ICMPv6
+                            if let Some(icmpv6_header) = &ip_layer.icmpv6 {
+                                if icmpv6_header.icmpv6_type == Icmpv6Type::EchoReply {
+                                    let probe_result: ProbeResult = ProbeResult {
+                                        seq: seq,
+                                        ip_addr: setting.dst_ip,
+                                        host_name: setting.dst_hostname.clone(),
+                                        port_number: None,
+                                        port_status: None,
+                                        ttl: ipv6_header.hop_limit,
+                                        hop: crate::ip::guess_initial_ttl(ipv6_header.hop_limit) - ipv6_header.hop_limit,
+                                        rtt: recv_time,
+                                        probe_status: ProbeStatus::new(),
+                                        protocol: Protocol::ICMP,
+                                        node_type: NodeType::Destination,
+                                        sent_packet_size: icmp_packet.len(),
+                                        received_packet_size: packet.len(),
+                                    };
+                                    responses.push(probe_result.clone());
+                                    match msg_tx.lock() {
+                                        Ok(lr) => match lr.send(probe_result) {
+                                            Ok(_) => {}
+                                            Err(_) => {}
+                                        },
                                         Err(_) => {}
-                                    },
-                                    Err(_) => {}
+                                    }
+                                    break;
                                 }
-                                break;
                             }
                         }
                     }
