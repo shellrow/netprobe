@@ -106,6 +106,7 @@ pub(crate) fn icmp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataL
                         },
                         Err(_) => {}
                     }
+                    break;
                 },
             }
             let wait_time: Duration = Instant::now().duration_since(send_time);
@@ -119,6 +120,7 @@ pub(crate) fn icmp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataL
                     },
                     Err(_) => {}
                 }
+                break;
             }
         }
         if seq < setting.count {

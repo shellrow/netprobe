@@ -102,6 +102,7 @@ pub(crate) fn tcp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLi
                         },
                         Err(_) => {}
                     }
+                    break;
                 },
             }
             let wait_time: Duration = Instant::now().duration_since(send_time);
@@ -115,6 +116,7 @@ pub(crate) fn tcp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLi
                     },
                     Err(_) => {}
                 }
+                break;
             }
         }
         if seq < setting.count {
