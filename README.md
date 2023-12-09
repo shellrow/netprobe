@@ -1,4 +1,8 @@
-# netprobe
+[crates-badge]: https://img.shields.io/crates/v/netprobe.svg
+[crates-url]: https://crates.io/crates/netprobe
+[license-badge]: https://img.shields.io/crates/l/netprobe.svg
+
+# netprobe [![Crates.io][crates-badge]][crates-url] ![License][license-badge]
 Cross-Platform Network Probe Library. Written in Rust.
 
 ## Features
