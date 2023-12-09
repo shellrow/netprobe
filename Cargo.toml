@@ -9,12 +9,29 @@ edition = "2021"
 rand = "0.8"
 default-net = { version = "0.21", optional = true }
 xenet = { version = "0.3", optional = true }
-hickory-resolver = "0.24"
-tokio = "1.21"
-futures = {version = "0.3", features = ["executor", "thread-pool"]}
+hickory-resolver = { version = "0.24" }
+tokio = { version = "1.21", optional = true }
+futures = {version = "0.3", features = ["executor", "thread-pool"], optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
 chrono = "0.4"
 
 [features]
-default = ["dep:default-net", "dep:xenet", "serde"]
+default = ["dep:default-net", "dep:xenet", "serde", "async"]
 serde = ["dep:serde", "default-net/serde", "xenet/serde"]
+async = ["dep:tokio", "dep:futures"]
+
+[[example]]
+name = "icmp_ping"
+path = "examples/icmp_ping.rs"
+
+[[example]]
+name = "tcp_ping"
+path = "examples/tcp_ping.rs"
+
+[[example]]
+name = "udp_ping"
+path = "examples/udp_ping.rs"
+
+[[example]]
+name = "udp_trace"
+path = "examples/udp_trace.rs"

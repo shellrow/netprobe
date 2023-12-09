@@ -6,7 +6,10 @@ use std::thread;
 use std::time::Duration;
 #[cfg(not(any(unix, target_os = "windows")))]
 use hickory_resolver::config::{ResolverConfig, ResolverOpts};
-use hickory_resolver::{AsyncResolver, Resolver};
+use hickory_resolver::Resolver;
+
+#[cfg(feature = "async")]
+use hickory_resolver::AsyncResolver;
 
 pub fn lookup_host_name(host_name: String) -> Option<IpAddr> {
     let ip_vec: Vec<IpAddr> = resolve_domain(host_name);
@@ -28,6 +31,7 @@ pub fn lookup_host_name(host_name: String) -> Option<IpAddr> {
     }
 }
 
+#[cfg(feature = "async")]
 pub async fn lookup_host_name_async(host_name: String) -> Option<IpAddr> {
     let ip_vec: Vec<IpAddr> = resolve_domain_async(host_name).await;
     let mut ipv6_vec: Vec<IpAddr> = vec![];
@@ -57,6 +61,7 @@ pub fn lookup_ip_addr(ip_addr: IpAddr) -> Option<String> {
     }
 }
 
+#[cfg(feature = "async")]
 pub async fn lookup_ip_addr_async(ip_addr: String) -> String {
     let ips: Vec<String> = resolve_ip_async(ip_addr).await;
     if ips.len() > 0 {
@@ -156,6 +161,7 @@ fn resolve_ip(ip_addr: IpAddr) -> Vec<String> {
     }
 }
 
+#[cfg(feature = "async")]
 #[cfg(any(unix, target_os = "windows"))]
 #[allow(dead_code)]
 async fn resolve_domain_async(host_name: String) -> Vec<IpAddr> {
@@ -172,6 +178,7 @@ async fn resolve_domain_async(host_name: String) -> Vec<IpAddr> {
     ips
 }
 
+#[cfg(feature = "async")]
 #[cfg(not(any(unix, target_os = "windows")))]
 #[allow(dead_code)]
 async fn resolve_domain_async(host_name: String) -> Vec<IpAddr> {
@@ -189,6 +196,7 @@ async fn resolve_domain_async(host_name: String) -> Vec<IpAddr> {
     ips
 }
 
+#[cfg(feature = "async")]
 #[cfg(any(unix, target_os = "windows"))]
 async fn resolve_ip_async(ip_addr: String) -> Vec<String> {
     let ip_addr: IpAddr = IpAddr::from_str(ip_addr.as_str()).unwrap();
@@ -223,6 +231,7 @@ async fn resolve_ip_async(ip_addr: String) -> Vec<String> {
     }
 }
 
+#[cfg(feature = "async")]
 #[cfg(not(any(unix, target_os = "windows")))]
 async fn resolve_ip_async(ip_addr: String) -> Vec<String> {
     let mut names: Vec<String> = vec![];
@@ -254,6 +263,7 @@ async fn resolve_ip_async(ip_addr: String) -> Vec<String> {
     }
 }
 
+#[cfg(feature = "async")]
 pub async fn lookup_ips_async(ips: Vec<IpAddr>) -> HashMap<IpAddr, String> {
     let mut tasks = stream::iter(ips)
         .map(|ip| async move {
