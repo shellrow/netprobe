@@ -13,7 +13,8 @@ Cross-Platform Network Probe Library. Written in Rust.
     - [x] IPv4 TCP
     - [x] IPv6 TCP
 
-## Upcoming Features
+## TODO
+- [ ] Documentation
 - [ ] More in-depth network investigations
 - [ ] Support for higher-layer probes (e.g., DNS, HTTP, etc.)
 
