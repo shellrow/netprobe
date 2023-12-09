@@ -47,7 +47,7 @@ pub(crate) fn udp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLi
                                     hop: crate::ip::guess_initial_ttl(ttl) - ttl,
                                     rtt: recv_time,
                                     probe_status: ProbeStatus::new(),
-                                    protocol: Protocol::ICMP,
+                                    protocol: Protocol::UDP,
                                     node_type: NodeType::Destination,
                                     sent_packet_size: udp_packet.len(),
                                     received_packet_size: packet.len(),
@@ -77,7 +77,7 @@ pub(crate) fn udp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLi
                                     hop: crate::ip::guess_initial_ttl(ttl) - ttl,
                                     rtt: recv_time,
                                     probe_status: ProbeStatus::new(),
-                                    protocol: Protocol::ICMP,
+                                    protocol: Protocol::UDP,
                                     node_type: NodeType::Destination,
                                     sent_packet_size: udp_packet.len(),
                                     received_packet_size: packet.len(),
@@ -97,7 +97,7 @@ pub(crate) fn udp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLi
                 },
                 Err(e) => {
                     eprintln!("Failed to receive packet: {}", e);
-                    let probe_result = ProbeResult::timeout(seq, setting.dst_ip, setting.dst_hostname.clone(), Protocol::ICMP, udp_packet.len());
+                    let probe_result = ProbeResult::timeout(seq, setting.dst_ip, setting.dst_hostname.clone(), Protocol::UDP, udp_packet.len());
                     responses.push(probe_result.clone());
                     match msg_tx.lock() {
                         Ok(lr) => match lr.send(probe_result) {
@@ -111,7 +111,7 @@ pub(crate) fn udp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLi
             }
             let wait_time: Duration = Instant::now().duration_since(send_time);
             if wait_time > setting.receive_timeout {
-                let probe_result = ProbeResult::timeout(seq, setting.dst_ip, setting.dst_hostname.clone(), Protocol::ICMP, udp_packet.len());
+                let probe_result = ProbeResult::timeout(seq, setting.dst_ip, setting.dst_hostname.clone(), Protocol::UDP, udp_packet.len());
                 responses.push(probe_result.clone());
                 match msg_tx.lock() {
                     Ok(lr) => match lr.send(probe_result) {
