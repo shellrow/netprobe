@@ -1,7 +1,7 @@
-use std::net::{IpAddr, Ipv6Addr};
-use std::{thread, env, process};
 use netprobe::neighbor::DeviceResolver;
 use netprobe::setting::ProbeSetting;
+use std::net::{IpAddr, Ipv6Addr};
+use std::{env, process, thread};
 use xenet::net::interface::Interface;
 
 const USAGE: &str = "USAGE: ndp <NETWORK INTERFACE> <TARGET IPv6 Addr>";
@@ -32,7 +32,7 @@ fn main() {
                     process::exit(1);
                 }
                 IpAddr::V6(ipv6) => ipv6,
-            }
+            },
             Err(e) => {
                 println!("Failed to parse target ip: {}", e);
                 eprintln!("{USAGE}");
@@ -45,23 +45,22 @@ fn main() {
             process::exit(1);
         }
     };
-    let setting : ProbeSetting = ProbeSetting::ndp(interface, dst_ip, 4).unwrap();
+    let setting: ProbeSetting = ProbeSetting::ndp(interface, dst_ip, 4).unwrap();
     let resolver: DeviceResolver = DeviceResolver::new(setting).unwrap();
     let rx = resolver.get_progress_receiver();
-    let handle = thread::spawn(move || {
-        resolver.resolve()
-    });
+    let handle = thread::spawn(move || resolver.resolve());
     for r in rx.lock().unwrap().iter() {
-        println!("{} [{:?}] {} Bytes from MAC Addr:{}, IP Addr:{}, RTT:{:?}", r.seq, r.protocol, r.received_packet_size, r.mac_addr, r.ip_addr, r.rtt);
+        println!(
+            "{} [{:?}] {} Bytes from MAC Addr:{}, IP Addr:{}, RTT:{:?}",
+            r.seq, r.protocol, r.received_packet_size, r.mac_addr, r.ip_addr, r.rtt
+        );
     }
     match handle.join() {
-        Ok(resolve_result) => {
-            match resolve_result {
-                Ok(r) => {
-                    println!("NDP Result: {:?}", r);
-                },
-                Err(e) => println!("{:?}", e),
+        Ok(resolve_result) => match resolve_result {
+            Ok(r) => {
+                println!("NDP Result: {:?}", r);
             }
+            Err(e) => println!("{:?}", e),
         },
         Err(e) => println!("{:?}", e),
     }

@@ -1,10 +1,10 @@
 use std::net::IpAddr;
 
 use xenet::net::mac::MacAddr;
+use xenet::packet::ethernet::EtherType;
+use xenet::util::packet_builder::arp::ArpPacketBuilder;
 use xenet::util::packet_builder::builder::PacketBuilder;
 use xenet::util::packet_builder::ethernet::EthernetPacketBuilder;
-use xenet::util::packet_builder::arp::ArpPacketBuilder;
-use xenet::packet::ethernet::EtherType;
 
 use crate::setting::ProbeSetting;
 

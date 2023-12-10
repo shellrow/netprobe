@@ -1,7 +1,7 @@
-use std::time::Duration;
-use std::net::IpAddr;
-use xenet::net::mac::MacAddr;
 use crate::setting::Protocol;
+use std::net::IpAddr;
+use std::time::Duration;
+use xenet::net::mac::MacAddr;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -140,7 +140,7 @@ pub struct ProbeResult {
     /// Sent packet size
     pub sent_packet_size: usize,
     /// Received packet size
-    pub received_packet_size: usize,   
+    pub received_packet_size: usize,
 }
 
 impl ProbeResult {
@@ -162,7 +162,13 @@ impl ProbeResult {
             received_packet_size: 0,
         }
     }
-    pub fn timeout(seq: u8, ip_addr: IpAddr, host_name: String, protocol: Protocol, sent_packet_size: usize) -> ProbeResult {
+    pub fn timeout(
+        seq: u8,
+        ip_addr: IpAddr,
+        host_name: String,
+        protocol: Protocol,
+        sent_packet_size: usize,
+    ) -> ProbeResult {
         ProbeResult {
             seq: seq,
             mac_addr: MacAddr::zero(),
@@ -173,14 +179,22 @@ impl ProbeResult {
             ttl: 0,
             hop: 0,
             rtt: Duration::from_millis(0),
-            probe_status: ProbeStatus::with_timeout_message(format!("Request timeout for seq {}", seq)),
+            probe_status: ProbeStatus::with_timeout_message(format!(
+                "Request timeout for seq {}",
+                seq
+            )),
             protocol: protocol,
             node_type: NodeType::Destination,
             sent_packet_size: sent_packet_size,
             received_packet_size: 0,
         }
     }
-    pub fn trace_timeout(seq: u8, protocol: Protocol, sent_packet_size: usize, node_type: NodeType) -> ProbeResult {
+    pub fn trace_timeout(
+        seq: u8,
+        protocol: Protocol,
+        sent_packet_size: usize,
+        node_type: NodeType,
+    ) -> ProbeResult {
         ProbeResult {
             seq: seq,
             mac_addr: MacAddr::zero(),
@@ -191,7 +205,10 @@ impl ProbeResult {
             ttl: 0,
             hop: 0,
             rtt: Duration::from_millis(0),
-            probe_status: ProbeStatus::with_timeout_message(format!("Request timeout for seq {}", seq)),
+            probe_status: ProbeStatus::with_timeout_message(format!(
+                "Request timeout for seq {}",
+                seq
+            )),
             protocol: protocol,
             node_type: node_type,
             sent_packet_size: sent_packet_size,

@@ -1,14 +1,19 @@
-use xenet::datalink::{DataLinkSender, DataLinkReceiver};
-use xenet::packet::frame::{ParseOption, Frame};
-use xenet::packet::icmpv6::Icmpv6Type;
+use crate::result::{DeviceResolveResult, NodeType, ProbeResult, ProbeStatus};
 use crate::setting::{ProbeSetting, Protocol};
-use crate::result::{ProbeResult, DeviceResolveResult, ProbeStatus, NodeType};
 use std::net::IpAddr;
 use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
-use std::time::{Instant, Duration};
+use std::time::{Duration, Instant};
+use xenet::datalink::{DataLinkReceiver, DataLinkSender};
+use xenet::packet::frame::{Frame, ParseOption};
+use xenet::packet::icmpv6::Icmpv6Type;
 
-pub(crate) fn run_ndp(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLinkReceiver>, setting: &ProbeSetting, msg_tx: &Arc<Mutex<Sender<ProbeResult>>>) -> DeviceResolveResult {
+pub(crate) fn run_ndp(
+    tx: &mut Box<dyn DataLinkSender>,
+    rx: &mut Box<dyn DataLinkReceiver>,
+    setting: &ProbeSetting,
+    msg_tx: &Arc<Mutex<Sender<ProbeResult>>>,
+) -> DeviceResolveResult {
     let mut result = DeviceResolveResult::new();
     result.protocol = Protocol::NDP;
     let mut parse_option: ParseOption = ParseOption::default();
@@ -24,7 +29,7 @@ pub(crate) fn run_ndp(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLin
         let ndp_packet: Vec<u8> = crate::packet::ndp::build_ndp_packet(setting.clone());
         let send_time = Instant::now();
         match tx.send(&ndp_packet) {
-            Some(_) => {},
+            Some(_) => {}
             None => eprintln!("Failed to send packet"),
         }
         loop {
@@ -44,7 +49,9 @@ pub(crate) fn run_ndp(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLin
                                     }
                                     // ICMPv6
                                     if let Some(icmpv6_header) = &ip_layer.icmpv6 {
-                                        if icmpv6_header.icmpv6_type == Icmpv6Type::NeighborAdvertisement {
+                                        if icmpv6_header.icmpv6_type
+                                            == Icmpv6Type::NeighborAdvertisement
+                                        {
                                             let probe_result: ProbeResult = ProbeResult {
                                                 seq: seq,
                                                 mac_addr: ethernet_header.source,
@@ -53,7 +60,9 @@ pub(crate) fn run_ndp(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLin
                                                 port_number: None,
                                                 port_status: None,
                                                 ttl: ipv6_header.hop_limit,
-                                                hop: crate::ip::guess_initial_ttl(ipv6_header.hop_limit) - ipv6_header.hop_limit,
+                                                hop: crate::ip::guess_initial_ttl(
+                                                    ipv6_header.hop_limit,
+                                                ) - ipv6_header.hop_limit,
                                                 rtt: recv_time,
                                                 probe_status: ProbeStatus::new(),
                                                 protocol: Protocol::NDP,
@@ -76,10 +85,16 @@ pub(crate) fn run_ndp(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLin
                             }
                         }
                     }
-                },
+                }
                 Err(e) => {
                     eprintln!("Failed to receive packet: {}", e);
-                    let probe_result = ProbeResult::timeout(seq, setting.dst_ip, setting.dst_hostname.clone(), Protocol::NDP, ndp_packet.len());
+                    let probe_result = ProbeResult::timeout(
+                        seq,
+                        setting.dst_ip,
+                        setting.dst_hostname.clone(),
+                        Protocol::NDP,
+                        ndp_packet.len(),
+                    );
                     responses.push(probe_result.clone());
                     match msg_tx.lock() {
                         Ok(lr) => match lr.send(probe_result) {
@@ -89,11 +104,17 @@ pub(crate) fn run_ndp(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLin
                         Err(_) => {}
                     }
                     break;
-                },
+                }
             }
             let wait_time: Duration = Instant::now().duration_since(send_time);
             if wait_time > setting.receive_timeout {
-                let probe_result = ProbeResult::timeout(seq, setting.dst_ip, setting.dst_hostname.clone(), Protocol::NDP, ndp_packet.len());
+                let probe_result = ProbeResult::timeout(
+                    seq,
+                    setting.dst_ip,
+                    setting.dst_hostname.clone(),
+                    Protocol::NDP,
+                    ndp_packet.len(),
+                );
                 responses.push(probe_result.clone());
                 match msg_tx.lock() {
                     Ok(lr) => match lr.send(probe_result) {

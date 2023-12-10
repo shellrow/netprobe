@@ -1,13 +1,18 @@
-use xenet::datalink::{DataLinkSender, DataLinkReceiver};
-use xenet::packet::frame::{ParseOption, Frame};
-use xenet::packet::arp::ArpOperation;
+use crate::result::{DeviceResolveResult, NodeType, ProbeResult, ProbeStatus};
 use crate::setting::{ProbeSetting, Protocol};
-use crate::result::{ProbeResult, DeviceResolveResult, ProbeStatus, NodeType};
 use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
-use std::time::{Instant, Duration};
+use std::time::{Duration, Instant};
+use xenet::datalink::{DataLinkReceiver, DataLinkSender};
+use xenet::packet::arp::ArpOperation;
+use xenet::packet::frame::{Frame, ParseOption};
 
-pub(crate) fn run_arp(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLinkReceiver>, setting: &ProbeSetting, msg_tx: &Arc<Mutex<Sender<ProbeResult>>>) -> DeviceResolveResult {
+pub(crate) fn run_arp(
+    tx: &mut Box<dyn DataLinkSender>,
+    rx: &mut Box<dyn DataLinkReceiver>,
+    setting: &ProbeSetting,
+    msg_tx: &Arc<Mutex<Sender<ProbeResult>>>,
+) -> DeviceResolveResult {
     let mut result = DeviceResolveResult::new();
     result.protocol = Protocol::ARP;
     let mut parse_option: ParseOption = ParseOption::default();
@@ -23,7 +28,7 @@ pub(crate) fn run_arp(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLin
         let arp_packet: Vec<u8> = crate::packet::arp::build_arp_packet(setting.clone());
         let send_time = Instant::now();
         match tx.send(&arp_packet) {
-            Some(_) => {},
+            Some(_) => {}
             None => eprintln!("Failed to send packet"),
         }
         loop {
@@ -67,10 +72,16 @@ pub(crate) fn run_arp(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLin
                             }
                         }
                     }
-                },
+                }
                 Err(e) => {
                     eprintln!("Failed to receive packet: {}", e);
-                    let probe_result = ProbeResult::timeout(seq, setting.dst_ip, setting.dst_hostname.clone(), Protocol::ARP, arp_packet.len());
+                    let probe_result = ProbeResult::timeout(
+                        seq,
+                        setting.dst_ip,
+                        setting.dst_hostname.clone(),
+                        Protocol::ARP,
+                        arp_packet.len(),
+                    );
                     responses.push(probe_result.clone());
                     match msg_tx.lock() {
                         Ok(lr) => match lr.send(probe_result) {
@@ -80,11 +91,17 @@ pub(crate) fn run_arp(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLin
                         Err(_) => {}
                     }
                     break;
-                },
+                }
             }
             let wait_time: Duration = Instant::now().duration_since(send_time);
             if wait_time > setting.receive_timeout {
-                let probe_result = ProbeResult::timeout(seq, setting.dst_ip, setting.dst_hostname.clone(), Protocol::ARP, arp_packet.len());
+                let probe_result = ProbeResult::timeout(
+                    seq,
+                    setting.dst_ip,
+                    setting.dst_hostname.clone(),
+                    Protocol::ARP,
+                    arp_packet.len(),
+                );
                 responses.push(probe_result.clone());
                 match msg_tx.lock() {
                     Ok(lr) => match lr.send(probe_result) {

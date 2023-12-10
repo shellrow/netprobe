@@ -6,15 +6,15 @@ use hickory_resolver::config::{ResolverConfig, ResolverOpts};
 use hickory_resolver::Resolver;
 
 #[cfg(feature = "async")]
+use futures::stream::{self, StreamExt};
+#[cfg(feature = "async")]
+use hickory_resolver::AsyncResolver;
+#[cfg(feature = "async")]
 use std::collections::HashMap;
 #[cfg(feature = "async")]
 use std::str::FromStr;
 #[cfg(feature = "async")]
 use std::thread;
-#[cfg(feature = "async")]
-use futures::stream::{self, StreamExt};
-#[cfg(feature = "async")]
-use hickory_resolver::AsyncResolver;
 
 pub fn lookup_host_name(host_name: String) -> Option<IpAddr> {
     let ip_vec: Vec<IpAddr> = resolve_domain(host_name);

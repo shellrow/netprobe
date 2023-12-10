@@ -1,7 +1,7 @@
 pub(crate) mod udp;
 
-use crate::setting::ProbeSetting;
 use crate::result::{ProbeResult, TracerouteResult};
+use crate::setting::ProbeSetting;
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::{Arc, Mutex};
 use xenet::net::interface::Interface;
@@ -25,7 +25,10 @@ impl Tracer {
         // Check interface
         if crate::interface::get_interface_by_index(setting.if_index).is_none() {
             if crate::interface::get_interface_by_name(setting.if_name.clone()).is_none() {
-                return Err(format!("Tracer::new: unable to get interface. index: {}, name: {}", setting.if_index, setting.if_name));
+                return Err(format!(
+                    "Tracer::new: unable to get interface. index: {}, name: {}",
+                    setting.if_index, setting.if_name
+                ));
             }
         }
         let (tx, rx) = channel();
@@ -46,10 +49,18 @@ impl Tracer {
     }
 }
 
-fn run_traceroute(setting: &ProbeSetting, msg_tx: &Arc<Mutex<Sender<ProbeResult>>>) -> Result<TracerouteResult, String> {
+fn run_traceroute(
+    setting: &ProbeSetting,
+    msg_tx: &Arc<Mutex<Sender<ProbeResult>>>,
+) -> Result<TracerouteResult, String> {
     let interface: Interface = match crate::interface::get_interface_by_index(setting.if_index) {
         Some(interface) => interface,
-        None => return Err(format!("run_traceroute: unable to get interface by index {}", setting.if_index)),
+        None => {
+            return Err(format!(
+                "run_traceroute: unable to get interface by index {}",
+                setting.if_index
+            ))
+        }
     };
     let config = xenet::datalink::Config {
         write_buffer_size: 4096,
@@ -68,12 +79,8 @@ fn run_traceroute(setting: &ProbeSetting, msg_tx: &Arc<Mutex<Sender<ProbeResult>
         Err(e) => return Err(format!("run_traceroute: unable to create channel: {}", e)),
     };
     match setting.protocol {
-        crate::setting::Protocol::ICMP => {
-            Err("ICMP traceroute is not supported".to_string())
-        }
-        crate::setting::Protocol::TCP => {
-            Err("TCP traceroute is not supported".to_string())
-        }
+        crate::setting::Protocol::ICMP => Err("ICMP traceroute is not supported".to_string()),
+        crate::setting::Protocol::TCP => Err("TCP traceroute is not supported".to_string()),
         crate::setting::Protocol::UDP => {
             let result = udp::udp_trace(&mut tx, &mut rx, setting, msg_tx);
             return Ok(result);

@@ -1,3 +1,4 @@
+use crate::setting::ProbeSetting;
 use std::net::IpAddr;
 use xenet::packet::ethernet::EtherType;
 use xenet::packet::icmp::IcmpType;
@@ -5,11 +6,10 @@ use xenet::packet::icmpv6::Icmpv6Type;
 use xenet::packet::ip::IpNextLevelProtocol;
 use xenet::util::packet_builder::builder::PacketBuilder;
 use xenet::util::packet_builder::ethernet::EthernetPacketBuilder;
-use xenet::util::packet_builder::ipv4::Ipv4PacketBuilder;
-use xenet::util::packet_builder::ipv6::Ipv6PacketBuilder;
 use xenet::util::packet_builder::icmp::IcmpPacketBuilder;
 use xenet::util::packet_builder::icmpv6::Icmpv6PacketBuilder;
-use crate::setting::ProbeSetting;
+use xenet::util::packet_builder::ipv4::Ipv4PacketBuilder;
+use xenet::util::packet_builder::ipv6::Ipv6PacketBuilder;
 
 /// Build ICMP packet
 pub fn build_icmp_packet(setting: ProbeSetting, hop_limit: Option<u8>) -> Vec<u8> {
@@ -34,7 +34,7 @@ pub fn build_icmp_packet(setting: ProbeSetting, hop_limit: Option<u8>) -> Vec<u8
                     Ipv4PacketBuilder::new(src_ipv4, dst_ipv4, IpNextLevelProtocol::Icmp);
                 if let Some(hoplimit) = hop_limit {
                     ipv4_packet_builder.ttl = Some(hoplimit);
-                }else {
+                } else {
                     ipv4_packet_builder.ttl = Some(setting.hop_limit);
                 }
                 packet_builder.set_ipv4(ipv4_packet_builder);
@@ -48,7 +48,7 @@ pub fn build_icmp_packet(setting: ProbeSetting, hop_limit: Option<u8>) -> Vec<u8
                     Ipv6PacketBuilder::new(src_ipv4, dst_ipv6, IpNextLevelProtocol::Icmpv6);
                 if let Some(hoplimit) = hop_limit {
                     ipv6_packet_builder.hop_limit = Some(hoplimit);
-                }else {
+                } else {
                     ipv6_packet_builder.hop_limit = Some(setting.hop_limit);
                 }
                 packet_builder.set_ipv6(ipv6_packet_builder);
