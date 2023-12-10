@@ -1,3 +1,4 @@
+use xenet::net::mac::MacAddr;
 use xenet::datalink::{DataLinkSender, DataLinkReceiver};
 use xenet::packet::frame::{ParseOption, Frame};
 use xenet::packet::icmp::IcmpType;
@@ -34,6 +35,14 @@ pub(crate) fn udp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLi
                 Ok(packet) => {
                     let recv_time: Duration = Instant::now().duration_since(send_time);
                     let frame: Frame = Frame::from_bytes(&packet, parse_option.clone());
+                    // Datalink
+                    let mut mac_addr: MacAddr = MacAddr::zero();
+                    if let Some(datalink_layer) = &frame.datalink {
+                        // Ethernet
+                        if let Some(ethernet_header) = &datalink_layer.ethernet {
+                            mac_addr = ethernet_header.source;
+                        }
+                    }
                     if let Some(ip_layer) = &frame.ip {
                         // IPv4
                         if let Some(ipv4_header) = &ip_layer.ipv4 {
@@ -45,6 +54,7 @@ pub(crate) fn udp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLi
                                 if icmp_header.icmp_type == IcmpType::DestinationUnreachable {
                                     let probe_result: ProbeResult = ProbeResult {
                                         seq: seq,
+                                        mac_addr: mac_addr,
                                         ip_addr: setting.dst_ip,
                                         host_name: setting.dst_hostname.clone(),
                                         port_number: setting.dst_port,
@@ -80,6 +90,7 @@ pub(crate) fn udp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLi
                                 if icmpv6_header.icmpv6_type == Icmpv6Type::DestinationUnreachable {
                                     let probe_result: ProbeResult = ProbeResult {
                                         seq: seq,
+                                        mac_addr: mac_addr,
                                         ip_addr: setting.dst_ip,
                                         host_name: setting.dst_hostname.clone(),
                                         port_number: setting.dst_port,

@@ -1,3 +1,4 @@
+use xenet::net::mac::MacAddr;
 use xenet::datalink::{DataLinkSender, DataLinkReceiver};
 use xenet::packet::frame::{ParseOption, Frame};
 use xenet::packet::tcp::TcpFlags;
@@ -32,6 +33,14 @@ pub(crate) fn tcp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLi
                 Ok(packet) => {
                     let recv_time: Duration = Instant::now().duration_since(send_time);
                     let frame: Frame = Frame::from_bytes(&packet, parse_option.clone());
+                    // Datalink
+                    let mut mac_addr: MacAddr = MacAddr::zero();
+                    if let Some(datalink_layer) = &frame.datalink {
+                        // Ethernet
+                        if let Some(ethernet_header) = &datalink_layer.ethernet {
+                            mac_addr = ethernet_header.source;
+                        }
+                    }
                     // So deep nested... but this is simplest way to check TCP packet safely.
                     if let Some(ip_layer) = &frame.ip {
                         if let Some(transport_layer) = &frame.transport {
@@ -43,6 +52,7 @@ pub(crate) fn tcp_ping(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataLi
                                 }
                                 let mut probe_result: ProbeResult = ProbeResult {
                                     seq: seq,
+                                    mac_addr: mac_addr,
                                     ip_addr: setting.dst_ip,
                                     host_name: setting.dst_hostname.clone(),
                                     port_number: Some(tcp_header.source),

@@ -1,3 +1,4 @@
+use xenet::net::mac::MacAddr;
 use xenet::datalink::{DataLinkSender, DataLinkReceiver};
 use xenet::packet::frame::{ParseOption, Frame};
 use xenet::packet::icmp::IcmpType;
@@ -35,6 +36,14 @@ pub(crate) fn udp_trace(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataL
                 Ok(packet) => {
                     let recv_time: Duration = Instant::now().duration_since(send_time);
                     let frame: Frame = Frame::from_bytes(&packet, parse_option.clone());
+                    // Datalink
+                    let mut mac_addr: MacAddr = MacAddr::zero();
+                    if let Some(datalink_layer) = &frame.datalink {
+                        // Ethernet
+                        if let Some(ethernet_header) = &datalink_layer.ethernet {
+                            mac_addr = ethernet_header.source;
+                        }
+                    }
                     if let Some(ip_layer) = &frame.ip {
                         // IPv4
                         if let Some(ipv4_header) = &ip_layer.ipv4 {
@@ -44,6 +53,7 @@ pub(crate) fn udp_trace(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataL
                                     IcmpType::TimeExceeded => {
                                         let probe_result: ProbeResult = ProbeResult {
                                             seq: seq_ttl,
+                                            mac_addr: mac_addr,
                                             ip_addr: IpAddr::V4(ipv4_header.source),
                                             host_name: ipv4_header.source.to_string(),
                                             port_number: None,
@@ -74,6 +84,7 @@ pub(crate) fn udp_trace(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataL
                                     IcmpType::DestinationUnreachable => {
                                         let probe_result: ProbeResult = ProbeResult {
                                             seq: seq_ttl,
+                                            mac_addr: mac_addr,
                                             ip_addr: IpAddr::V4(ipv4_header.source),
                                             host_name: ipv4_header.source.to_string(),
                                             port_number: setting.dst_port,
@@ -110,6 +121,7 @@ pub(crate) fn udp_trace(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataL
                                     Icmpv6Type::TimeExceeded => {
                                         let probe_result: ProbeResult = ProbeResult {
                                             seq: seq_ttl,
+                                            mac_addr: mac_addr,
                                             ip_addr: IpAddr::V6(ipv6_header.source),
                                             host_name: ipv6_header.source.to_string(),
                                             port_number: None,
@@ -140,6 +152,7 @@ pub(crate) fn udp_trace(tx: &mut Box<dyn DataLinkSender>, rx: &mut Box<dyn DataL
                                     Icmpv6Type::DestinationUnreachable => {
                                         let probe_result: ProbeResult = ProbeResult {
                                             seq: seq_ttl,
+                                            mac_addr: mac_addr,
                                             ip_addr: IpAddr::V6(ipv6_header.source),
                                             host_name: ipv6_header.source.to_string(),
                                             port_number: setting.dst_port,

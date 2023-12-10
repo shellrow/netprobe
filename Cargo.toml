@@ -40,3 +40,11 @@ path = "examples/udp_ping.rs"
 [[example]]
 name = "udp_trace"
 path = "examples/udp_trace.rs"
+
+[[example]]
+name = "arp"
+path = "examples/arp.rs"
+
+[[example]]
+name = "ndp"
+path = "examples/ndp.rs"

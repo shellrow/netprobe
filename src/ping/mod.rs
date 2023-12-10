@@ -82,5 +82,8 @@ fn run_ping(setting: &ProbeSetting, msg_tx: &Arc<Mutex<Sender<ProbeResult>>>) ->
             let result = udp::udp_ping(&mut tx, &mut rx, setting, msg_tx);
             return Ok(result);
         }
+        _ => {
+            return Err("run_ping: unsupported protocol".to_string());
+        }
     }
 }

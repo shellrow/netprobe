@@ -1,5 +1,6 @@
 pub use xenet::net::interface::Interface;
 pub use xenet::net::mac::MacAddr;
+use std::net::Ipv6Addr;
 use std::time::Duration;
 use std::net::IpAddr;
 use std::net::Ipv4Addr;
@@ -13,6 +14,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Protocol {
+    ARP,
+    NDP,
     ICMP,
     TCP,
     UDP,
@@ -585,6 +588,74 @@ impl ProbeSetting {
             send_rate: Duration::from_secs(1),
             use_tun: use_tun,
             loopback: loopback,
+        };
+        Ok(setting)
+    }
+    pub fn arp(interface: Interface, dst_ipv4_addr: Ipv4Addr, count: u8) -> Result<ProbeSetting, String> {
+        let src_ipv4_addr: Ipv4Addr = if interface.ipv4.len() > 0 {
+            interface.ipv4[0].addr
+        } else {
+            return Err(format!("ARP: IPv4 address not found on interface {}", interface.name));
+        };
+        if interface.is_tun() {
+            return Err(format!("ARP: tun interface is not supported"));
+        }
+        if interface.is_loopback() {
+            return Err(format!("ARP: loopback interface is not supported"));
+        }
+        
+        let setting = ProbeSetting {
+            if_index: interface.index,
+            if_name: interface.name.clone(),
+            src_mac: crate::interface::get_interface_macaddr(&interface),
+            dst_mac: MacAddr::broadcast(),
+            src_ip: IpAddr::V4(src_ipv4_addr),
+            src_port: None,
+            dst_ip: IpAddr::V4(dst_ipv4_addr),
+            dst_hostname: dst_ipv4_addr.to_string(),
+            dst_port: None,
+            hop_limit: 64,
+            count: count,
+            protocol: Protocol::ARP,
+            receive_timeout: Duration::from_secs(1),
+            probe_timeout: Duration::from_secs(30),
+            send_rate: Duration::from_secs(1),
+            use_tun: false,
+            loopback: false,
+        };
+        Ok(setting)
+    }
+    pub fn ndp(interface: Interface, dst_ipv6_addr: Ipv6Addr, count: u8) -> Result<ProbeSetting, String> {
+        let src_ipv6_addr: Ipv6Addr = if interface.ipv6.len() > 0 {
+            interface.ipv6[0].addr
+        } else {
+            return Err(format!("NDP: IPv6 address not found on interface {}", interface.name));
+        };
+        if interface.is_tun() {
+            return Err(format!("NDP: tun interface is not supported"));
+        }
+        if interface.is_loopback() {
+            return Err(format!("NDP: loopback interface is not supported"));
+        }
+        
+        let setting = ProbeSetting {
+            if_index: interface.index,
+            if_name: interface.name.clone(),
+            src_mac: crate::interface::get_interface_macaddr(&interface),
+            dst_mac: MacAddr::broadcast(),
+            src_ip: IpAddr::V6(src_ipv6_addr),
+            src_port: None,
+            dst_ip: IpAddr::V6(dst_ipv6_addr),
+            dst_hostname: dst_ipv6_addr.to_string(),
+            dst_port: None,
+            hop_limit: 64,
+            count: count,
+            protocol: Protocol::NDP,
+            receive_timeout: Duration::from_secs(1),
+            probe_timeout: Duration::from_secs(30),
+            send_rate: Duration::from_secs(1),
+            use_tun: false,
+            loopback: false,
         };
         Ok(setting)
     }

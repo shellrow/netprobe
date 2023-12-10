@@ -1,5 +1,6 @@
 use std::time::Duration;
 use std::net::IpAddr;
+use xenet::net::mac::MacAddr;
 use crate::setting::Protocol;
 
 #[cfg(feature = "serde")]
@@ -114,6 +115,8 @@ impl ProbeStatus {
 pub struct ProbeResult {
     /// Sequence number
     pub seq: u8,
+    /// MAC address
+    pub mac_addr: MacAddr,
     /// IP address
     pub ip_addr: IpAddr,
     /// Host name
@@ -144,6 +147,7 @@ impl ProbeResult {
     pub fn new() -> ProbeResult {
         ProbeResult {
             seq: 0,
+            mac_addr: MacAddr::zero(),
             ip_addr: IpAddr::V4(std::net::Ipv4Addr::LOCALHOST),
             host_name: String::new(),
             port_number: None,
@@ -161,6 +165,7 @@ impl ProbeResult {
     pub fn timeout(seq: u8, ip_addr: IpAddr, host_name: String, protocol: Protocol, sent_packet_size: usize) -> ProbeResult {
         ProbeResult {
             seq: seq,
+            mac_addr: MacAddr::zero(),
             ip_addr: ip_addr,
             host_name: host_name,
             port_number: None,
@@ -178,6 +183,7 @@ impl ProbeResult {
     pub fn trace_timeout(seq: u8, protocol: Protocol, sent_packet_size: usize, node_type: NodeType) -> ProbeResult {
         ProbeResult {
             seq: seq,
+            mac_addr: MacAddr::zero(),
             ip_addr: IpAddr::V4(std::net::Ipv4Addr::UNSPECIFIED),
             host_name: String::new(),
             port_number: None,
@@ -277,6 +283,33 @@ impl TracerouteResult {
             end_time: String::new(),
             elapsed_time: Duration::from_millis(0),
             protocol: Protocol::UDP,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct DeviceResolveResult {
+    pub results: Vec<ProbeResult>,
+    pub probe_status: ProbeStatus,
+    /// start-time in RFC 3339 and ISO 8601 date and time string
+    pub start_time: String,
+    /// end-time in RFC 3339 and ISO 8601 date and time string
+    pub end_time: String,
+    /// Elapsed time
+    pub elapsed_time: Duration,
+    pub protocol: Protocol,
+}
+
+impl DeviceResolveResult {
+    pub fn new() -> DeviceResolveResult {
+        DeviceResolveResult {
+            results: Vec::new(),
+            probe_status: ProbeStatus::new(),
+            start_time: String::new(),
+            end_time: String::new(),
+            elapsed_time: Duration::from_millis(0),
+            protocol: Protocol::ARP,
         }
     }
 }
