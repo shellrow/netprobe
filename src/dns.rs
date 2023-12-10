@@ -58,9 +58,9 @@ pub async fn lookup_host_name_async(host_name: String) -> Option<IpAddr> {
 }
 
 pub fn lookup_ip_addr(ip_addr: IpAddr) -> Option<String> {
-    let ips: Vec<String> = resolve_ip(ip_addr);
-    if ips.len() > 0 {
-        return Some(ips[0].clone());
+    let names: Vec<String> = resolve_ip(ip_addr);
+    if names.len() > 0 {
+        return Some(names[0].clone());
     } else {
         return None;
     }
@@ -291,4 +291,12 @@ pub fn lookup_ips(ips: Vec<IpAddr>) -> HashMap<IpAddr, String> {
     let rt: tokio::runtime::Runtime = tokio::runtime::Runtime::new().unwrap();
     let handle = thread::spawn(move || rt.block_on(async { lookup_ips_async(ips).await }));
     handle.join().unwrap()
+}
+
+pub fn lookup_host(host: String) -> Vec<IpAddr> {
+    resolve_domain(host)
+}
+
+pub fn lookup_addr(addr: IpAddr) -> Vec<String> {
+    resolve_ip(addr)
 }
