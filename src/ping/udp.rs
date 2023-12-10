@@ -33,7 +33,7 @@ pub(crate) fn udp_ping(
         let send_time = Instant::now();
         match tx.send(&udp_packet) {
             Some(_) => {}
-            None => eprintln!("Failed to send packet"),
+            None => {},
         }
         loop {
             match rx.next() {
@@ -125,8 +125,7 @@ pub(crate) fn udp_ping(
                         }
                     }
                 }
-                Err(e) => {
-                    eprintln!("Failed to receive packet: {}", e);
+                Err(_e) => {
                     let probe_result = ProbeResult::timeout(
                         seq,
                         setting.dst_ip,
