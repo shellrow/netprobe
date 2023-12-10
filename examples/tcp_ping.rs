@@ -7,7 +7,7 @@ use xenet::net::interface::Interface;
 
 // TCP ping to cloudflare's one.one.one.one:80 (1.1.1.1:80)
 fn main() {
-    let interface: Interface = match env::args().nth(2) {
+    let interface: Interface = match env::args().nth(1) {
         Some(n) => {
             // Use interface specified by user
             let interfaces: Vec<Interface> = xenet::net::interface::get_interfaces();
