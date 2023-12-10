@@ -16,6 +16,9 @@ Cross-Platform Network Probe Library. Written in Rust.
     - [x] IPv6 UDP
     - [x] IPv4 TCP
     - [x] IPv6 TCP
+- neighbor
+    - [x] ARP
+    - [x] NDP
 
 ## TODO
 - [ ] Documentation
@@ -26,5 +29,5 @@ Cross-Platform Network Probe Library. Written in Rust.
 Add `netprobe` to your dependencies
 ```
 [dependencies]
-netprobe = "0.1"
+netprobe = "0.2"
 ```

@@ -1,13 +1,13 @@
 use std::net::{IpAddr, Ipv4Addr};
 //use std::net::Ipv6Addr;
-use std::{thread, env, process};
 use netprobe::ping::Pinger;
 use netprobe::setting::ProbeSetting;
+use std::{env, process, thread};
 use xenet::net::interface::Interface;
 
 // TCP ping to cloudflare's one.one.one.one:80 (1.1.1.1:80)
 fn main() {
-    let interface: Interface = match env::args().nth(2) {
+    let interface: Interface = match env::args().nth(1) {
         Some(n) => {
             // Use interface specified by user
             let interfaces: Vec<Interface> = xenet::net::interface::get_interfaces();
@@ -30,24 +30,42 @@ fn main() {
     };
     let dst_ip: IpAddr = IpAddr::V4(Ipv4Addr::new(1, 1, 1, 1));
     //let dst_ip: IpAddr = IpAddr::V6(Ipv6Addr::new(0x2606, 0x4700, 0x4700, 0, 0, 0, 0, 0x1111));
-    let setting : ProbeSetting = ProbeSetting::tcp_ping(interface, dst_ip, 80, 4).unwrap();
+    let setting: ProbeSetting = ProbeSetting::tcp_ping(interface, dst_ip, 80, 4).unwrap();
     let pinger: Pinger = Pinger::new(setting).unwrap();
     let rx = pinger.get_progress_receiver();
-    let handle = thread::spawn(move || {
-        pinger.ping()
-    });
+    let handle = thread::spawn(move || pinger.ping());
     for r in rx.lock().unwrap().iter() {
-        println!("{} [{:?}] {} Bytes from IP:{}, Port:{:?}, Status:{:?}, HOP:{}, TTL:{}, RTT:{:?}", r.seq, r.protocol, r.received_packet_size, r.ip_addr, r.port_number, r.port_status, r.hop, r.ttl, r.rtt);
+        println!(
+            "{} [{:?}] {} Bytes from IP:{}, Port:{:?}, Status:{:?}, HOP:{}, TTL:{}, RTT:{:?}",
+            r.seq,
+            r.protocol,
+            r.received_packet_size,
+            r.ip_addr,
+            r.port_number,
+            r.port_status,
+            r.hop,
+            r.ttl,
+            r.rtt
+        );
     }
     match handle.join() {
-        Ok(ping_result) => {
-            match ping_result {
-                Ok(ping_result) => {
-                    println!("Transmitted: {}, Received: {}, Loss: {}%", ping_result.stat.transmitted_count, ping_result.stat.received_count, 100.0 - ping_result.stat.transmitted_count as f64 / ping_result.stat.received_count as f64 * 100.0);
-                    println!("MIN: {:?}, MAX:{:?}, AGV:{:?}", ping_result.stat.min, ping_result.stat.max, ping_result.stat.avg);
-                },
-                Err(e) => println!("{:?}", e),
+        Ok(ping_result) => match ping_result {
+            Ok(ping_result) => {
+                println!(
+                    "Transmitted: {}, Received: {}, Loss: {}%",
+                    ping_result.stat.transmitted_count,
+                    ping_result.stat.received_count,
+                    100.0
+                        - ping_result.stat.transmitted_count as f64
+                            / ping_result.stat.received_count as f64
+                            * 100.0
+                );
+                println!(
+                    "MIN: {:?}, MAX:{:?}, AGV:{:?}",
+                    ping_result.stat.min, ping_result.stat.max, ping_result.stat.avg
+                );
             }
+            Err(e) => println!("{:?}", e),
         },
         Err(e) => println!("{:?}", e),
     }

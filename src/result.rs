@@ -1,6 +1,7 @@
-use std::time::Duration;
-use std::net::IpAddr;
 use crate::setting::Protocol;
+use std::net::IpAddr;
+use std::time::Duration;
+use xenet::net::mac::MacAddr;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -114,6 +115,8 @@ impl ProbeStatus {
 pub struct ProbeResult {
     /// Sequence number
     pub seq: u8,
+    /// MAC address
+    pub mac_addr: MacAddr,
     /// IP address
     pub ip_addr: IpAddr,
     /// Host name
@@ -137,13 +140,14 @@ pub struct ProbeResult {
     /// Sent packet size
     pub sent_packet_size: usize,
     /// Received packet size
-    pub received_packet_size: usize,   
+    pub received_packet_size: usize,
 }
 
 impl ProbeResult {
     pub fn new() -> ProbeResult {
         ProbeResult {
             seq: 0,
+            mac_addr: MacAddr::zero(),
             ip_addr: IpAddr::V4(std::net::Ipv4Addr::LOCALHOST),
             host_name: String::new(),
             port_number: None,
@@ -158,9 +162,16 @@ impl ProbeResult {
             received_packet_size: 0,
         }
     }
-    pub fn timeout(seq: u8, ip_addr: IpAddr, host_name: String, protocol: Protocol, sent_packet_size: usize) -> ProbeResult {
+    pub fn timeout(
+        seq: u8,
+        ip_addr: IpAddr,
+        host_name: String,
+        protocol: Protocol,
+        sent_packet_size: usize,
+    ) -> ProbeResult {
         ProbeResult {
             seq: seq,
+            mac_addr: MacAddr::zero(),
             ip_addr: ip_addr,
             host_name: host_name,
             port_number: None,
@@ -168,16 +179,25 @@ impl ProbeResult {
             ttl: 0,
             hop: 0,
             rtt: Duration::from_millis(0),
-            probe_status: ProbeStatus::with_timeout_message(format!("Request timeout for seq {}", seq)),
+            probe_status: ProbeStatus::with_timeout_message(format!(
+                "Request timeout for seq {}",
+                seq
+            )),
             protocol: protocol,
             node_type: NodeType::Destination,
             sent_packet_size: sent_packet_size,
             received_packet_size: 0,
         }
     }
-    pub fn trace_timeout(seq: u8, protocol: Protocol, sent_packet_size: usize, node_type: NodeType) -> ProbeResult {
+    pub fn trace_timeout(
+        seq: u8,
+        protocol: Protocol,
+        sent_packet_size: usize,
+        node_type: NodeType,
+    ) -> ProbeResult {
         ProbeResult {
             seq: seq,
+            mac_addr: MacAddr::zero(),
             ip_addr: IpAddr::V4(std::net::Ipv4Addr::UNSPECIFIED),
             host_name: String::new(),
             port_number: None,
@@ -185,7 +205,10 @@ impl ProbeResult {
             ttl: 0,
             hop: 0,
             rtt: Duration::from_millis(0),
-            probe_status: ProbeStatus::with_timeout_message(format!("Request timeout for seq {}", seq)),
+            probe_status: ProbeStatus::with_timeout_message(format!(
+                "Request timeout for seq {}",
+                seq
+            )),
             protocol: protocol,
             node_type: node_type,
             sent_packet_size: sent_packet_size,
@@ -277,6 +300,33 @@ impl TracerouteResult {
             end_time: String::new(),
             elapsed_time: Duration::from_millis(0),
             protocol: Protocol::UDP,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct DeviceResolveResult {
+    pub results: Vec<ProbeResult>,
+    pub probe_status: ProbeStatus,
+    /// start-time in RFC 3339 and ISO 8601 date and time string
+    pub start_time: String,
+    /// end-time in RFC 3339 and ISO 8601 date and time string
+    pub end_time: String,
+    /// Elapsed time
+    pub elapsed_time: Duration,
+    pub protocol: Protocol,
+}
+
+impl DeviceResolveResult {
+    pub fn new() -> DeviceResolveResult {
+        DeviceResolveResult {
+            results: Vec::new(),
+            probe_status: ProbeStatus::new(),
+            start_time: String::new(),
+            end_time: String::new(),
+            elapsed_time: Duration::from_millis(0),
+            protocol: Protocol::ARP,
         }
     }
 }

@@ -1,6 +1,6 @@
 [package]
 name = "netprobe"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["shellrow <shellrow@protonmail.com>"]
 description = "Cross-Platform Network Probe Library"
@@ -40,3 +40,11 @@ path = "examples/udp_ping.rs"
 [[example]]
 name = "udp_trace"
 path = "examples/udp_trace.rs"
+
+[[example]]
+name = "arp"
+path = "examples/arp.rs"
+
+[[example]]
+name = "ndp"
+path = "examples/ndp.rs"
