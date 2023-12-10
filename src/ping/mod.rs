@@ -8,9 +8,9 @@ use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::{Arc, Mutex};
 use xenet::net::interface::Interface;
 
-/// Pinger structure
+/// Pinger structure.
 ///
-/// Contains various settings for ping
+/// Supports ICMP Ping, TCP Ping, UDP Ping.
 #[derive(Clone, Debug)]
 pub struct Pinger {
     /// Probe Setting

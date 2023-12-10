@@ -11,8 +11,8 @@ use xenet::packet::ip::IpNextLevelProtocol;
 use xenet::packet::icmpv6::ndp::{NDP_SOL_PACKET_LEN, NDP_OPT_PACKET_LEN};
 use crate::setting::ProbeSetting;
 
+/// Build NDP packet
 pub fn build_ndp_packet(setting: ProbeSetting) -> Vec<u8> {
-    // Packet builder for ICMP Echo Request
     let mut packet_builder = PacketBuilder::new();
     let ethernet_packet_builder = EthernetPacketBuilder {
         src_mac: setting.src_mac,
@@ -27,11 +27,12 @@ pub fn build_ndp_packet(setting: ProbeSetting) -> Vec<u8> {
             match setting.dst_ip {
                 IpAddr::V4(_) => {}
                 IpAddr::V6(dst_ipv6) => {
+                    // IPv6 Header
                     let mut ipv6_packet_builder = Ipv6PacketBuilder::new(src_ipv6, dst_ipv6, IpNextLevelProtocol::Icmpv6);
                     ipv6_packet_builder.payload_length = Some((NDP_SOL_PACKET_LEN + NDP_OPT_PACKET_LEN + MAC_ADDR_LEN) as u16);
                     ipv6_packet_builder.hop_limit = Some(u8::MAX);
                     packet_builder.set_ipv6(ipv6_packet_builder);
-
+                    // NDP Header
                     let ndp_packet_builder = NdpPacketBuilder::new(setting.src_mac, src_ipv6, dst_ipv6);
                     packet_builder.set_ndp(ndp_packet_builder);
                 }

@@ -8,9 +8,10 @@ use xenet::packet::ethernet::EtherType;
 
 use crate::setting::ProbeSetting;
 
+/// Build ARP packet
 pub fn build_arp_packet(setting: ProbeSetting) -> Vec<u8> {
-    // Packet builder for ARP Request
     let mut packet_builder = PacketBuilder::new();
+    // Ethernet Header
     let ethernet_packet_builder = EthernetPacketBuilder {
         src_mac: setting.src_mac,
         dst_mac: MacAddr::broadcast(),
@@ -21,6 +22,7 @@ pub fn build_arp_packet(setting: ProbeSetting) -> Vec<u8> {
         IpAddr::V4(src_ipv4) => {
             match setting.dst_ip {
                 IpAddr::V4(dst_ipv4) => {
+                    // ARP Header
                     let arp_packet = ArpPacketBuilder {
                         src_mac: setting.src_mac,
                         dst_mac: MacAddr::broadcast(),

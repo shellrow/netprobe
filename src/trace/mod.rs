@@ -6,9 +6,9 @@ use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::{Arc, Mutex};
 use xenet::net::interface::Interface;
 
-/// Tracer structure
+/// Tracer structure.
 ///
-/// Contains various settings for traceroute
+/// Supports UDP Traceroute.
 #[derive(Clone, Debug)]
 pub struct Tracer {
     /// Probe Setting

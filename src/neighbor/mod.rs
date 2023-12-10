@@ -8,6 +8,9 @@ use std::sync::{Arc, Mutex};
 use crate::setting::ProbeSetting;
 use crate::result::{ProbeResult, DeviceResolveResult};
 
+/// Device Resolver structure.
+/// 
+/// Supports ARP and NDP.
 pub struct DeviceResolver {
     /// Probe Setting
     pub probe_setting: ProbeSetting,
@@ -44,7 +47,7 @@ impl DeviceResolver {
     }
 }
 
-pub fn run_resolver(setting: &ProbeSetting, msg_tx: &Arc<Mutex<Sender<ProbeResult>>>) -> Result<DeviceResolveResult, String> {
+fn run_resolver(setting: &ProbeSetting, msg_tx: &Arc<Mutex<Sender<ProbeResult>>>) -> Result<DeviceResolveResult, String> {
     let interface: Interface = match crate::interface::get_interface_by_index(setting.if_index) {
         Some(interface) => interface,
         None => return Err(format!("run_ping: unable to get interface by index {}", setting.if_index)),
