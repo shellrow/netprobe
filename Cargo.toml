@@ -48,3 +48,7 @@ path = "examples/arp.rs"
 [[example]]
 name = "ndp"
 path = "examples/ndp.rs"
+
+[[example]]
+name = "fingerprinting"
+path = "examples/fingerprinting.rs"
