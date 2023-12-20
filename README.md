@@ -29,5 +29,5 @@ Cross-Platform Network Probe Library. Written in Rust.
 Add `netprobe` to your dependencies
 ```
 [dependencies]
-netprobe = "0.2"
+netprobe = "0.3"
 ```
