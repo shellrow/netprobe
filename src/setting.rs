@@ -6,6 +6,7 @@ pub use xenet::net::interface::Interface;
 pub use xenet::net::mac::MacAddr;
 
 use crate::dns::{lookup_host_name, lookup_ip_addr};
+use crate::fp::FingerprintType;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -39,7 +40,7 @@ pub struct ProbeSetting {
     pub receive_timeout: Duration,
     pub probe_timeout: Duration,
     pub send_rate: Duration,
-    pub use_tun: bool,
+    pub tunnel: bool,
     pub loopback: bool,
 }
 
@@ -61,7 +62,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: false,
+            tunnel: false,
             loopback: false,
         }
     }
@@ -116,7 +117,7 @@ impl ProbeSetting {
         self
     }
     pub fn with_use_tun(mut self, use_tun: bool) -> ProbeSetting {
-        self.use_tun = use_tun;
+        self.tunnel = use_tun;
         self
     }
     pub fn with_loopback(mut self, loopback: bool) -> ProbeSetting {
@@ -179,7 +180,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: use_tun,
+            tunnel: use_tun,
             loopback: loopback,
         };
         Ok(setting)
@@ -243,7 +244,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: use_tun,
+            tunnel: use_tun,
             loopback: loopback,
         };
         Ok(setting)
@@ -308,7 +309,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: use_tun,
+            tunnel: use_tun,
             loopback: loopback,
         };
         Ok(setting)
@@ -373,7 +374,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: use_tun,
+            tunnel: use_tun,
             loopback: loopback,
         };
         Ok(setting)
@@ -434,7 +435,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: use_tun,
+            tunnel: use_tun,
             loopback: loopback,
         };
         Ok(setting)
@@ -498,7 +499,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: use_tun,
+            tunnel: use_tun,
             loopback: loopback,
         };
         Ok(setting)
@@ -559,7 +560,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: use_tun,
+            tunnel: use_tun,
             loopback: loopback,
         };
         Ok(setting)
@@ -623,7 +624,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: use_tun,
+            tunnel: use_tun,
             loopback: loopback,
         };
         Ok(setting)
@@ -664,7 +665,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: false,
+            tunnel: false,
             loopback: false,
         };
         Ok(setting)
@@ -705,8 +706,68 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: false,
+            tunnel: false,
             loopback: false,
+        };
+        Ok(setting)
+    }
+    pub fn fingerprinting(interface: Interface, ip_addr: IpAddr, port: Option<u16>, probe_type: FingerprintType) -> Result<ProbeSetting, String> {
+        let src_ip: IpAddr = match ip_addr {
+            IpAddr::V4(_) => match crate::interface::get_interface_ipv4(&interface) {
+                Some(ip) => ip,
+                None => return Err(String::from("IPv4 address not found on default interface.")),
+            },
+            IpAddr::V6(ipv6_addr) => {
+                if xenet::net::ipnet::is_global_ipv6(&ipv6_addr) {
+                    match crate::interface::get_interface_global_ipv6(&interface) {
+                        Some(ip) => ip,
+                        None => {
+                            return Err(String::from(
+                                "Global IPv6 address not found on default interface.",
+                            ))
+                        }
+                    }
+                } else {
+                    match crate::interface::get_interface_local_ipv6(&interface) {
+                        Some(ip) => ip,
+                        None => {
+                            return Err(String::from(
+                                "Local IPv6 address not found on default interface.",
+                            ))
+                        }
+                    }
+                }
+            }
+        };
+        let use_tun = interface.is_tun();
+        let loopback = interface.is_loopback();
+
+        let setting = ProbeSetting {
+            if_index: interface.index,
+            if_name: interface.name.clone(),
+            src_mac: if use_tun {
+                MacAddr::zero()
+            } else {
+                crate::interface::get_interface_macaddr(&interface)
+            },
+            dst_mac: if use_tun {
+                MacAddr::zero()
+            } else {
+                crate::interface::get_gateway_macaddr(&interface)
+            },
+            src_ip: src_ip,
+            src_port: Some(crate::packet::tcp::TCP_DEFAULT_SRC_PORT),
+            dst_ip: ip_addr,
+            dst_hostname: ip_addr.to_string(),
+            dst_port: port,
+            hop_limit: 64,
+            count: 1,
+            protocol: probe_type.protocol(),
+            receive_timeout: Duration::from_secs(1),
+            probe_timeout: Duration::from_secs(30),
+            send_rate: Duration::from_secs(1),
+            tunnel: use_tun,
+            loopback: loopback,
         };
         Ok(setting)
     }

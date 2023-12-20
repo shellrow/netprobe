@@ -16,7 +16,7 @@ pub(crate) fn run_arp(
     let mut result = DeviceResolveResult::new();
     result.protocol = Protocol::ARP;
     let mut parse_option: ParseOption = ParseOption::default();
-    if setting.use_tun {
+    if setting.tunnel {
         let payload_offset = if setting.loopback { 14 } else { 0 };
         parse_option.from_ip_packet = true;
         parse_option.offset = payload_offset;

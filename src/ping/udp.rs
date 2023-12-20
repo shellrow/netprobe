@@ -20,7 +20,7 @@ pub(crate) fn udp_ping(
     let mut result = PingResult::new();
     result.protocol = Protocol::UDP;
     let mut parse_option: ParseOption = ParseOption::default();
-    if setting.use_tun {
+    if setting.tunnel {
         let payload_offset = if setting.loopback { 14 } else { 0 };
         parse_option.from_ip_packet = true;
         parse_option.offset = payload_offset;
