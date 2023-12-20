@@ -118,7 +118,7 @@ fn run_probe_impl(fp: &Fingerprinter) -> Fingerprint {
         },
     };
     let mut parse_option: ParseOption = ParseOption::default();
-    if fp.probe_setting.use_tun {
+    if fp.probe_setting.tunnel {
         let payload_offset = if fp.probe_setting.loopback { 14 } else { 0 };
         parse_option.from_ip_packet = true;
         parse_option.offset = payload_offset;

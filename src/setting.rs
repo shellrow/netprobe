@@ -40,7 +40,7 @@ pub struct ProbeSetting {
     pub receive_timeout: Duration,
     pub probe_timeout: Duration,
     pub send_rate: Duration,
-    pub use_tun: bool,
+    pub tunnel: bool,
     pub loopback: bool,
 }
 
@@ -62,7 +62,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: false,
+            tunnel: false,
             loopback: false,
         }
     }
@@ -117,7 +117,7 @@ impl ProbeSetting {
         self
     }
     pub fn with_use_tun(mut self, use_tun: bool) -> ProbeSetting {
-        self.use_tun = use_tun;
+        self.tunnel = use_tun;
         self
     }
     pub fn with_loopback(mut self, loopback: bool) -> ProbeSetting {
@@ -180,7 +180,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: use_tun,
+            tunnel: use_tun,
             loopback: loopback,
         };
         Ok(setting)
@@ -244,7 +244,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: use_tun,
+            tunnel: use_tun,
             loopback: loopback,
         };
         Ok(setting)
@@ -309,7 +309,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: use_tun,
+            tunnel: use_tun,
             loopback: loopback,
         };
         Ok(setting)
@@ -374,7 +374,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: use_tun,
+            tunnel: use_tun,
             loopback: loopback,
         };
         Ok(setting)
@@ -435,7 +435,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: use_tun,
+            tunnel: use_tun,
             loopback: loopback,
         };
         Ok(setting)
@@ -499,7 +499,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: use_tun,
+            tunnel: use_tun,
             loopback: loopback,
         };
         Ok(setting)
@@ -560,7 +560,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: use_tun,
+            tunnel: use_tun,
             loopback: loopback,
         };
         Ok(setting)
@@ -624,7 +624,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: use_tun,
+            tunnel: use_tun,
             loopback: loopback,
         };
         Ok(setting)
@@ -665,7 +665,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: false,
+            tunnel: false,
             loopback: false,
         };
         Ok(setting)
@@ -706,7 +706,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: false,
+            tunnel: false,
             loopback: false,
         };
         Ok(setting)
@@ -766,7 +766,7 @@ impl ProbeSetting {
             receive_timeout: Duration::from_secs(1),
             probe_timeout: Duration::from_secs(30),
             send_rate: Duration::from_secs(1),
-            use_tun: use_tun,
+            tunnel: use_tun,
             loopback: loopback,
         };
         Ok(setting)

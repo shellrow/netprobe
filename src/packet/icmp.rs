@@ -75,7 +75,7 @@ pub fn build_icmp_packet(setting: ProbeSetting, hop_limit: Option<u8>) -> Vec<u8
             }
         },
     }
-    if setting.use_tun {
+    if setting.tunnel {
         packet_builder.ip_packet()
     } else {
         packet_builder.packet()
@@ -156,7 +156,7 @@ pub fn build_icmp_probe_packet(setting: ProbeSetting, probe_type: FingerprintTyp
             }
         },
     }
-    if setting.use_tun {
+    if setting.tunnel {
         packet_builder.ip_packet()
     } else {
         packet_builder.packet()

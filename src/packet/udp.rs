@@ -90,7 +90,7 @@ pub fn build_udp_packet(setting: ProbeSetting, hop_limit: Option<u8>) -> Vec<u8>
             }
         },
     }
-    if setting.use_tun {
+    if setting.tunnel {
         packet_builder.ip_packet()
     } else {
         packet_builder.packet()
@@ -168,7 +168,7 @@ pub fn build_udp_probe_packet(setting: ProbeSetting) -> Vec<u8> {
             }
         },
     }
-    if setting.use_tun {
+    if setting.tunnel {
         packet_builder.ip_packet()
     } else {
         packet_builder.packet()

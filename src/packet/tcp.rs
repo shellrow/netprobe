@@ -78,7 +78,7 @@ pub fn build_tcp_packet(setting: ProbeSetting, hop_limit: Option<u8>) -> Vec<u8>
     ];
     packet_builder.set_tcp(tcp_packet_builder);
 
-    if setting.use_tun {
+    if setting.tunnel {
         packet_builder.ip_packet()
     } else {
         packet_builder.packet()
@@ -160,7 +160,7 @@ pub fn build_tcp_probe_packet(setting: ProbeSetting, probe_type: FingerprintType
     ];
     packet_builder.set_tcp(tcp_packet_builder);
 
-    if setting.use_tun {
+    if setting.tunnel {
         packet_builder.ip_packet()
     } else {
         packet_builder.packet()
@@ -211,7 +211,7 @@ pub fn build_tcp_control_packet(probe_setting: ProbeSetting, tcp_flags: u8) -> V
     tcp_packet_builder.window = 65535;
     tcp_packet_builder.flags = tcp_flags;
     packet_builder.set_tcp(tcp_packet_builder);
-    if probe_setting.use_tun {
+    if probe_setting.tunnel {
         packet_builder.ip_packet()
     } else {
         packet_builder.packet()
