@@ -186,11 +186,15 @@ pub(crate) fn tcp_ping(
     let probe_time = Instant::now().duration_since(start_time);
     result.end_time = crate::sys::get_sysdate();
     result.elapsed_time = probe_time;
+    let received_count: usize = responses
+        .iter()
+        .filter(|r| r.probe_status.kind == crate::result::ProbeStatusKind::Done)
+        .count();
     let ping_stat: PingStat = PingStat {
         responses: responses.clone(),
         probe_time: probe_time,
         transmitted_count: setting.count as usize,
-        received_count: responses.len(),
+        received_count: received_count,
         min: responses
             .iter()
             .map(|r| r.rtt)
@@ -199,7 +203,7 @@ pub(crate) fn tcp_ping(
         avg: responses
             .iter()
             .fold(Duration::from_millis(0), |acc, r| acc + r.rtt)
-            / responses.len() as u32,
+            / received_count as u32,
         max: responses
             .iter()
             .map(|r| r.rtt)
