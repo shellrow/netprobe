@@ -50,7 +50,7 @@ pub(crate) fn icmp_ping(
                     if let Some(ip_layer) = &frame.ip {
                         // IPv4
                         if let Some(ipv4_header) = &ip_layer.ipv4 {
-                            if IpAddr::V4(ipv4_header.source) != setting.dst_ip {
+                            if IpAddr::V4(ipv4_header.source) != setting.dst_ip || IpAddr::V4(ipv4_header.destination) != setting.src_ip {
                                 continue;
                             }
                             // IPv4 ICMP
@@ -87,7 +87,7 @@ pub(crate) fn icmp_ping(
                         }
                         // IPv6
                         if let Some(ipv6_header) = &ip_layer.ipv6 {
-                            if IpAddr::V6(ipv6_header.source) != setting.dst_ip {
+                            if IpAddr::V6(ipv6_header.source) != setting.dst_ip || IpAddr::V6(ipv6_header.destination) != setting.src_ip {
                                 continue;
                             }
                             // ICMPv6

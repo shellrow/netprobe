@@ -48,6 +48,16 @@ pub(crate) fn tcp_ping(
                     }
                     // So deep nested... but this is simplest way to check TCP packet safely.
                     if let Some(ip_layer) = &frame.ip {
+                        if let Some(ipv4_header) = &ip_layer.ipv4 {
+                            if IpAddr::V4(ipv4_header.source) != setting.dst_ip || IpAddr::V4(ipv4_header.destination) != setting.src_ip {
+                                continue;
+                            }
+                        }
+                        if let Some(ipv6_header) = &ip_layer.ipv6 {
+                            if IpAddr::V6(ipv6_header.source) != setting.dst_ip || IpAddr::V6(ipv6_header.destination) != setting.src_ip {
+                                continue;
+                            }
+                        }
                         if let Some(transport_layer) = &frame.transport {
                             if let Some(tcp_header) = &transport_layer.tcp {
                                 if let Some(port) = setting.dst_port {
