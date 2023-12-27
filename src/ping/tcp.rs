@@ -48,6 +48,16 @@ pub(crate) fn tcp_ping(
                     }
                     // So deep nested... but this is simplest way to check TCP packet safely.
                     if let Some(ip_layer) = &frame.ip {
+                        if let Some(ipv4_header) = &ip_layer.ipv4 {
+                            if IpAddr::V4(ipv4_header.source) != setting.dst_ip || IpAddr::V4(ipv4_header.destination) != setting.src_ip {
+                                continue;
+                            }
+                        }
+                        if let Some(ipv6_header) = &ip_layer.ipv6 {
+                            if IpAddr::V6(ipv6_header.source) != setting.dst_ip || IpAddr::V6(ipv6_header.destination) != setting.src_ip {
+                                continue;
+                            }
+                        }
                         if let Some(transport_layer) = &frame.transport {
                             if let Some(tcp_header) = &transport_layer.tcp {
                                 if let Some(port) = setting.dst_port {
@@ -176,11 +186,15 @@ pub(crate) fn tcp_ping(
     let probe_time = Instant::now().duration_since(start_time);
     result.end_time = crate::sys::get_sysdate();
     result.elapsed_time = probe_time;
+    let received_count: usize = responses
+        .iter()
+        .filter(|r| r.probe_status.kind == crate::result::ProbeStatusKind::Done)
+        .count();
     let ping_stat: PingStat = PingStat {
         responses: responses.clone(),
         probe_time: probe_time,
         transmitted_count: setting.count as usize,
-        received_count: responses.len(),
+        received_count: received_count,
         min: responses
             .iter()
             .map(|r| r.rtt)
@@ -189,7 +203,7 @@ pub(crate) fn tcp_ping(
         avg: responses
             .iter()
             .fold(Duration::from_millis(0), |acc, r| acc + r.rtt)
-            / responses.len() as u32,
+            / received_count as u32,
         max: responses
             .iter()
             .map(|r| r.rtt)

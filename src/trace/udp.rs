@@ -53,6 +53,9 @@ pub(crate) fn udp_trace(
                     if let Some(ip_layer) = &frame.ip {
                         // IPv4
                         if let Some(ipv4_header) = &ip_layer.ipv4 {
+                            if IpAddr::V4(ipv4_header.destination) != setting.src_ip {
+                                continue;
+                            }
                             // ICMP
                             if let Some(icmp_header) = &ip_layer.icmp {
                                 match icmp_header.icmp_type {
@@ -123,6 +126,9 @@ pub(crate) fn udp_trace(
                         }
                         // IPv6
                         if let Some(ipv6_header) = &ip_layer.ipv6 {
+                            if IpAddr::V6(ipv6_header.destination) != setting.src_ip {
+                                continue;
+                            }
                             // ICMPv6
                             if let Some(icmpv6_header) = &ip_layer.icmpv6 {
                                 match icmpv6_header.icmpv6_type {

@@ -1,5 +1,6 @@
 use crate::result::{DeviceResolveResult, NodeType, ProbeResult, ProbeStatus};
 use crate::setting::{ProbeSetting, Protocol};
+use std::net::IpAddr;
 use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
@@ -40,6 +41,13 @@ pub(crate) fn run_arp(
                     if let Some(datalink_layer) = &frame.datalink {
                         // Ethernet
                         if let Some(_ethernet_header) = &datalink_layer.ethernet {
+                            if let Some(ip_layer) = &frame.ip {
+                                if let Some(ipv4_header) = &ip_layer.ipv4 {
+                                    if IpAddr::V4(ipv4_header.source) != setting.dst_ip || IpAddr::V4(ipv4_header.destination) != setting.src_ip {
+                                        continue;
+                                    }
+                                }
+                            }
                             // ARP
                             if let Some(arp_header) = &datalink_layer.arp {
                                 if arp_header.operation == ArpOperation::Reply {

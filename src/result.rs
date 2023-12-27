@@ -61,7 +61,7 @@ impl NodeType {
 }
 
 /// Status of probe
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum ProbeStatusKind {
     /// Successfully completed

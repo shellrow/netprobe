@@ -44,7 +44,7 @@ pub(crate) fn run_ndp(
                             if let Some(ip_layer) = &frame.ip {
                                 // IPv6
                                 if let Some(ipv6_header) = &ip_layer.ipv6 {
-                                    if IpAddr::V6(ipv6_header.source) != setting.dst_ip {
+                                    if IpAddr::V6(ipv6_header.source) != setting.dst_ip || IpAddr::V6(ipv6_header.destination) != setting.src_ip {
                                         continue;
                                     }
                                     // ICMPv6

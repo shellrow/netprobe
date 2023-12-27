@@ -51,7 +51,7 @@ pub(crate) fn udp_ping(
                     if let Some(ip_layer) = &frame.ip {
                         // IPv4
                         if let Some(ipv4_header) = &ip_layer.ipv4 {
-                            if IpAddr::V4(ipv4_header.source) != setting.dst_ip {
+                            if IpAddr::V4(ipv4_header.source) != setting.dst_ip || IpAddr::V4(ipv4_header.destination) != setting.src_ip {
                                 continue;
                             }
                             // ICMP
@@ -88,7 +88,7 @@ pub(crate) fn udp_ping(
                         }
                         // IPv6
                         if let Some(ipv6_header) = &ip_layer.ipv6 {
-                            if IpAddr::V6(ipv6_header.source) != setting.dst_ip {
+                            if IpAddr::V6(ipv6_header.destination) != setting.src_ip {
                                 continue;
                             }
                             // ICMPv6
@@ -171,11 +171,15 @@ pub(crate) fn udp_ping(
     let probe_time = Instant::now().duration_since(start_time);
     result.end_time = crate::sys::get_sysdate();
     result.elapsed_time = probe_time;
+    let received_count: usize = responses
+        .iter()
+        .filter(|r| r.probe_status.kind == crate::result::ProbeStatusKind::Done)
+        .count();
     let ping_stat: PingStat = PingStat {
         responses: responses.clone(),
         probe_time: probe_time,
         transmitted_count: setting.count as usize,
-        received_count: responses.len(),
+        received_count: received_count,
         min: responses
             .iter()
             .map(|r| r.rtt)
@@ -184,7 +188,7 @@ pub(crate) fn udp_ping(
         avg: responses
             .iter()
             .fold(Duration::from_millis(0), |acc, r| acc + r.rtt)
-            / responses.len() as u32,
+            / received_count as u32,
         max: responses
             .iter()
             .map(|r| r.rtt)
